@@ -57,6 +57,7 @@ Follow these instructions to get the project running on your local machine.
 ```bash
 git clone https://github.com/Erdscsb/TaskFlow.git
 cd TaskFlow
+```
 
 ### 2. Backend Setup (Flask)
 
