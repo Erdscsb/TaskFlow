@@ -6,7 +6,7 @@ many-to-many association tables.
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_security_too import UserMixin, RoleMixin
+from flask_security import UserMixin, RoleMixin
 
 # --- App and Database Configuration ---
 

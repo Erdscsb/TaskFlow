@@ -13,7 +13,7 @@ Flask-RESTful==0.3.10
 
 # --- Database ---
 Flask-Migrate==4.0.4
-psycopg2-binary==2.9.6 # For PostgreSQL
+psycopg2-binary==2.9.11 # For PostgreSQL
 
 # --- Utilities ---
 python-dotenv==1.0.0
