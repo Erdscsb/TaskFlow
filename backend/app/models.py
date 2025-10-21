@@ -7,6 +7,7 @@ many-to-many association tables.
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import UserMixin, RoleMixin
+import uuid
 
 # --- App and Database Configuration ---
 
@@ -40,7 +41,6 @@ project_members = db.Table('project_members',
     db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
 )
 
-
 # --- Model Definitions ---
 
 class Role(db.Model, RoleMixin):
@@ -52,6 +52,10 @@ class Role(db.Model, RoleMixin):
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
+def generate_fs_uniquifier():
+    # Use a lambda function or simple call to generate a new UUID string
+    return uuid.uuid4().hex
+
 class User(db.Model, UserMixin):
     """
     Represents a user account.
@@ -62,6 +66,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     active = db.Column(db.Boolean(), default=True)
+    fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False, default=generate_fs_uniquifier)
 
     # Relationship to Roles (Many-to-Many)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
