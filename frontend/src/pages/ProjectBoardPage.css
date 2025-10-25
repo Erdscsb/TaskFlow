@@ -1,0 +1,15 @@
+.project-page-container {
+  padding: 0 20px 20px 20px;
+}
+
+.project-title {
+  color: #172b4d;
+  margin-bottom: 5px;
+}
+
+.project-description {
+  color: #5e6c84;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
