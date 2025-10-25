@@ -1,0 +1,8 @@
+{
+  "short_name": "TaskFlow",
+  "name": "TaskFlow Kanban Board",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
