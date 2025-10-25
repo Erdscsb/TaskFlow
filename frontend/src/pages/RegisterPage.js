@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './AuthForms.css';
 
-function LoginPage() {
+function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useContext(AuthContext);
+  const { register } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,14 +14,13 @@ function LoginPage() {
       alert('Please enter email and password');
       return;
     }
-    // The login function is from our context
-    await login(email, password);
+    await register(email, password);
   };
 
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h2>Login to TaskFlow</h2>
+        <h2>Create Account</h2>
         <div className="form-group">
           <label htmlFor="email">Email</label>
           <input
@@ -42,13 +41,13 @@ function LoginPage() {
             required
           />
         </div>
-        <button type="submit" className="auth-button">Login</button>
+        <button type="submit" className="auth-button">Sign Up</button>
         <p className="auth-switch">
-          Don't have an account? <Link to="/register">Sign up here</Link>
+          Already have an account? <Link to="/login">Login here</Link>
         </p>
       </form>
     </div>
   );
 }
 
-export default LoginPage;
+export default RegisterPage;
