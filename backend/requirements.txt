@@ -17,3 +17,4 @@ psycopg2-binary==2.9.11 # For PostgreSQL
 
 # --- Utilities ---
 python-dotenv==1.0.0
+setuptools==80.9.0
