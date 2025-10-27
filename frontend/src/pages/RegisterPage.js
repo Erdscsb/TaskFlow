@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './AuthForms.css';
 
@@ -7,6 +7,7 @@ function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,7 +15,12 @@ function RegisterPage() {
       alert('Please enter email and password');
       return;
     }
-    await register(email, password);
+    try {
+      await register(email, password);
+      navigate('/login');
+    } catch (error) {
+      // Error is already handled in the AuthContext, but you could add specific UI feedback here if needed
+    }
   };
 
   return (

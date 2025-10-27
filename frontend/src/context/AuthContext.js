@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    // 1. Initialize user state from localStorage
-    // We use JSON.parse to read the stored user object
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('appUser');
         try {
@@ -15,27 +14,42 @@ export function AuthProvider({ children }) {
         }
     });
 
-    // 2. Update login to accept a user object
-    const login = useCallback((userData) => {
-        setUser(userData);
-        // We use JSON.stringify to store the user object
-        localStorage.setItem('appUser', JSON.stringify(userData));
+    const login = useCallback(async (email, password) => {
+        try {
+            const response = await api.post('/login', { email, password });
+            const { user, token } = response.data;
+            setUser(user);
+            localStorage.setItem('appUser', JSON.stringify(user));
+            localStorage.setItem('token', token);
+        } catch (error) {
+            console.error('Login failed', error.response?.data);
+            alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
+        }
     }, []);
 
-    // 3. Update logout to clear the user
     const logout = useCallback(() => {
         setUser(null);
         localStorage.removeItem('appUser');
+        localStorage.removeItem('token');
     }, []);
 
-    // 4. Memoize the context value
+    const register = useCallback(async (email, password) => {
+        try {
+            const response = await api.post('/register', { email, password });
+            alert(response.data.message); 
+        } catch (error) {
+            console.error('Registration failed', error.response?.data);
+            alert('Registration failed: ' + (error.response?.data?.message || 'Unknown error'));
+        }
+    }, []);
+
     const value = useMemo(() => ({
         user,
-        // We can derive the token from the user object for App.js
-        token: user?.token || null, 
+        token: localStorage.getItem('token'),
         login,
-        logout
-    }), [user, login, logout]); // Dependency is on the 'user' object
+        logout,
+        register
+    }), [user, login, logout, register]);
 
     return (
         <AuthContext.Provider value={value}>
@@ -44,7 +58,6 @@ export function AuthProvider({ children }) {
     );
 }
 
-// 5. The useAuth hook remains the same
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
