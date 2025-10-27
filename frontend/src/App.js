@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 
 import LoginPage from './pages/LoginPage';
 //import RegisterPage from './pages/RegisterPage';
@@ -9,7 +9,7 @@ import ProjectBoardPage from './pages/ProjectBoardPage';
 import Navbar from './components/Navbar';
 
 function App() {
-  const { token } = useContext(AuthContext);
+  const { token } = useAuth();
 
   return (
     <div className="App">
