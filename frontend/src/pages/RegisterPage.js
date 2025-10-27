@@ -1,12 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import './AuthForms.css';
 
 function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { register } = useContext(AuthContext);
+  const { register } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
