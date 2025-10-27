@@ -41,8 +41,7 @@ function Board({ initialData, onDragEndCallback }) {
       };
       setBoardData(newState); // Optimistic UI update
       
-      // TODO: Call the onDragEndCallback to save to API
-      // onDragEndCallback(result, newState);
+      onDragEndCallback(result, newState);
       return;
     }
 
@@ -71,8 +70,7 @@ function Board({ initialData, onDragEndCallback }) {
     };
     setBoardData(newState); // Optimistic UI update
 
-    // TODO: Call the onDragEndCallback to save to API
-    // onDragEndCallback(result, newState);
+    onDragEndCallback(result, newState);
   };
 
   return (
