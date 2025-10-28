@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from './context/AuthContext.jsx';
 
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import ProjectBoardPage from './pages/ProjectBoardPage';
-import Navbar from './components/Navbar';
+import LoginPage from './pages/LoginPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import ProjectBoardPage from './pages/ProjectBoardPage.jsx';
+import Navbar from './components/Navbar.jsx';
 
 function App() {
   const { token } = useAuth();

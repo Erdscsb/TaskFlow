@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
-import Board from '../components/Board';
+import Board from '../components/Board.jsx';
 import './ProjectBoardPage.css';
 
 function ProjectBoardPage() {
