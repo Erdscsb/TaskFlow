@@ -4,32 +4,19 @@ It includes models for User, Role, Project, and Task, along with the necessary
 many-to-many association tables.
 """
 
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_security import UserMixin, RoleMixin
-import uuid
+# from flask_security import UserMixin, RoleMixin  <- Removed
+# import uuid <- Removed, no longer needed
 
-# --- App and Database Configuration ---
-
-# Initialize the Flask application
-app = Flask(__name__)
-
-# Configure the database connection.
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskflow.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# A secret key is needed for session management and security features.
-app.config['SECRET_KEY'] = 'super-secret-key-change-me'
-# Required for Flask-Security-Too
-app.config['SECURITY_PASSWORD_SALT'] = 'super-secret-salt-change-me'
-
-
-# Initialize the SQLAlchemy extension with the Flask app
-db = SQLAlchemy(app)
+# Initialize the SQLAlchemy extension.
+# The app instance will be associated with it in the app factory.
+db = SQLAlchemy()
 
 
 # --- Many-to-Many Association Tables ---
 
 # This is an association table for the many-to-many relationship between Users and Roles.
+# This is standard SQLAlchemy and is not dependent on Flask-Security-Too.
 roles_users = db.Table('roles_users',
     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
@@ -43,32 +30,34 @@ project_members = db.Table('project_members',
 
 # --- Model Definitions ---
 
-class Role(db.Model, RoleMixin):
+class Role(db.Model): # <- Removed RoleMixin
     """
     Represents a user role in the system (e.g., 'admin', 'user').
-    Inherits from RoleMixin for compatibility with Flask-Security-Too.
     """
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
-def generate_fs_uniquifier():
-    # Use a lambda function or simple call to generate a new UUID string
-    return uuid.uuid4().hex
+# --- Removed generate_fs_uniquifier function ---
 
-class User(db.Model, UserMixin):
+class User(db.Model): # <- Removed UserMixin
     """
     Represents a user account.
-    Inherits from UserMixin to get all the required fields for Flask-Security-Too
-    (e.g., password, active, etc.).
     """
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
+    
+    # You are now 100% responsible for managing this field.
+    # You must hash passwords before saving them here.
     password = db.Column(db.String(255), nullable=False)
-    active = db.Column(db.Boolean(), default=True)
-    fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False, default=generate_fs_uniquifier)
+    
+    # Kept this field as it's generally useful for disabling accounts.
+    active = db.Column(db.Boolean(), default=True) 
+    
+    # --- Removed fs_uniquifier column ---
 
     # Relationship to Roles (Many-to-Many)
+    # This works perfectly without the mixin.
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
     # Relationship to Projects (Many-to-Many)

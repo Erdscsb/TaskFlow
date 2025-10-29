@@ -7,29 +7,34 @@ This file defines the RESTful API routes for Tasks.
 
 from flask import request
 from flask_restful import Resource
-from flask_security import auth_token_required, current_user
+from flask_jwt_extended import jwt_required, get_jwt_identity  # <-- Imports changed
 
 from . import api
-from ..models import db, Project, Task
-
-from .project_routes import serialize_task
+from ..models import db, Project, Task, User  # <-- Added User
+from .project_routes import serialize_task  # Assuming this is in a neighboring file
 
 class TaskListResource(Resource):
     """
     Handles creation of tasks for a specific project.
     - POST /api/projects/<int:project_id>/tasks
     """
-    @auth_token_required
+    @jwt_required()  # <-- Decorator changed
     def post(self, project_id):
         """
         Creates a new task within a project.
         """
+        # --- Get the current user ---
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user:
+            return {'message': 'User not found'}, 401
+        
         project = Project.query.get(project_id)
         if not project:
             return {'message': 'Project not found'}, 404
         
         # --- SECURITY CHECK ---
-        if current_user not in project.members:
+        if user not in project.members:  # <-- Use the fetched user object
             return {'message': 'Unauthorized'}, 403
 
         data = request.get_json()
@@ -37,6 +42,7 @@ class TaskListResource(Resource):
             return {'message': 'Task title is required'}, 400
 
         status = data.get('status', 'TODO')
+        # This logic for finding the max order is great, no changes needed
         max_order = db.session.query(db.func.max(Task.order)).filter_by(
             project_id=project_id, 
             status=status
@@ -63,17 +69,24 @@ class TaskResource(Resource):
     - PUT /api/tasks/<int:task_id>
     - DELETE /api/tasks/<int:task_id>
     """
-    @auth_token_required
+    @jwt_required()  # <-- Decorator changed
     def put(self, task_id):
         """
         Updates a task's details (title, description).
         """
+        # --- Get the current user ---
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user:
+            return {'message': 'User not found'}, 401
+
         task = Task.query.get(task_id)
         if not task:
             return {'message': 'Task not found'}, 404
         
         # --- SECURITY CHECK ---
-        if current_user not in task.project.members:
+        # We check membership via the task's parent project
+        if user not in task.project.members:  # <-- Use the fetched user object
             return {'message': 'Unauthorized'}, 403
             
         data = request.get_json()
@@ -83,17 +96,23 @@ class TaskResource(Resource):
         db.session.commit()
         return serialize_task(task), 200
 
-    @auth_token_required
+    @jwt_required()  # <-- Decorator changed
     def delete(self, task_id):
         """
         Deletes a task.
         """
+        # --- Get the current user ---
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user:
+            return {'message': 'User not found'}, 401
+        
         task = Task.query.get(task_id)
         if not task:
             return {'message': 'Task not found'}, 404
 
         # --- SECURITY CHECK ---
-        if current_user not in task.project.members:
+        if user not in task.project.members:  # <-- Use the fetched user object
             return {'message': 'Unauthorized'}, 403
             
         db.session.delete(task)
@@ -106,18 +125,24 @@ class TaskMoveResource(Resource):
     Handles the drag-and-drop logic for moving a task.
     - PATCH /api/tasks/<int:task_id>/move
     """
-    @auth_token_required
+    @jwt_required()  # <-- Decorator changed
     def patch(self, task_id):
         """
         Updates a task's status and/or order.
         Expects JSON: { "status": "...", "order": ... }
         """
+        # --- Get the current user ---
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user:
+            return {'message': 'User not found'}, 401
+
         task = Task.query.get(task_id)
         if not task:
             return {'message': 'Task not found'}, 404
         
         # --- SECURITY CHECK ---
-        if current_user not in task.project.members:
+        if user not in task.project.members:  # <-- Use the fetched user object
             return {'message': 'Unauthorized'}, 403
 
         data = request.get_json()

@@ -1,28 +1,40 @@
 """
-This is the main application factory file.
-It initializes the Flask app, configures security, enables CORS,
-and registers the API blueprint.
+This file contains the application factory for the TaskFlow Flask app.
 """
 
-from flask_security import Security
+from flask import Flask
 from flask_cors import CORS
-from .models import app, db  # Import app and db from models.py
-from .security import user_datastore # Import the datastore
-from .api import api_bp # Import our API blueprint
+from flask_jwt_extended import JWTManager  # Import JWTManager
 
-# --- Flask-Security-Too Configuration ---
-app.config['SECURITY_TOKEN_AUTHENTICATION_HEADER'] = "Authentication-Token"
-app.config['SECURITY_REGISTERABLE'] = True       # Allow user registration
-app.config['SECURITY_SEND_REGISTER_EMAIL'] = False # Don't send emails
-app.config['SECURITY_UNAUTHORIZED_VIEW'] = None    # Don't redirect
-app.config['SECURITY_LOGIN_USER_TEMPLATE'] = None  # Don't use templates
+from .models import db, User, Role  # User and Role are still needed for your logic
+from .api import api_bp
 
-# --- Initialize Extensions ---
+def create_app():
+    """
+    Application factory function.
+    Initializes the Flask app, configures extensions, and registers blueprints.
+    """
+    app = Flask(__name__)
 
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+    # --- Configuration ---
+    # In a real app, load this from a config file or environment variables
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskflow.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = 'super-secret-key-change-me' # Used for session, CSRF, etc.
+    
+    # Configuration for Flask-JWT-Extended
+    # This key is used to sign the JWTs. Keep it secret!
+    app.config['JWT_SECRET_KEY'] = 'super-secret-jwt-key-change-me' 
 
-# Initialize Flask-Security-Too
-security = Security(app, user_datastore)
+    # --- Initialize Extensions ---
+    db.init_app(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+    
+    # --- Setup Flask-JWT-Extended ---
+    # This initializes the JWT manager
+    jwt = JWTManager(app)
 
-# --- Register Blueprints ---
-app.register_blueprint(api_bp)
+    # --- Register Blueprints ---
+    app.register_blueprint(api_bp)
+
+    return app

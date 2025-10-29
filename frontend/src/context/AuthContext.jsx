@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import api from '../services/api';
+import api from '../services/api'; // Make sure this file is updated! (See below)
 
 const AuthContext = createContext(null);
 
@@ -14,11 +14,20 @@ export function AuthProvider({ children }) {
         }
     });
 
+    // --- CHANGE 1: Store the token in state ---
+    // This makes the context "reactive" to token changes.
+    const [token, setToken] = useState(() => localStorage.getItem('token'));
+
     const login = useCallback(async (email, password) => {
         try {
             const response = await api.post('/login', { email, password });
             const { user, token } = response.data;
+            
+            // Set the state
             setUser(user);
+            setToken(token); // <-- Add this
+            
+            // Persist to localStorage
             localStorage.setItem('appUser', JSON.stringify(user));
             localStorage.setItem('token', token);
         } catch (error) {
@@ -28,7 +37,11 @@ export function AuthProvider({ children }) {
     }, []);
 
     const logout = useCallback(() => {
+        // Clear the state
         setUser(null);
+        setToken(null); // <-- Add this
+        
+        // Remove from localStorage
         localStorage.removeItem('appUser');
         localStorage.removeItem('token');
     }, []);
@@ -45,11 +58,11 @@ export function AuthProvider({ children }) {
 
     const value = useMemo(() => ({
         user,
-        token: localStorage.getItem('token'),
+        token, // <-- CHANGE 2: Use the token from state
         login,
         logout,
         register
-    }), [user, login, logout, register]);
+    }), [user, token, login, logout, register]); // <-- CHANGE 3: Add token to dependency array
 
     return (
         <AuthContext.Provider value={value}>
