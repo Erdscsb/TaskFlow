@@ -7,18 +7,18 @@ This file defines the RESTful API routes for Tasks.
 
 from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import jwt_required, get_jwt_identity  # <-- Imports changed
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from . import api
-from ..models import db, Project, Task, User  # <-- Added User
-from .project_routes import serialize_task  # Assuming this is in a neighboring file
+from ..models import db, Project, Task, User
+from .project_routes import serialize_task
 
 class TaskListResource(Resource):
     """
     Handles creation of tasks for a specific project.
     - POST /api/projects/<int:project_id>/tasks
     """
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def post(self, project_id):
         """
         Creates a new task within a project.
@@ -34,7 +34,7 @@ class TaskListResource(Resource):
             return {'message': 'Project not found'}, 404
         
         # --- SECURITY CHECK ---
-        if user not in project.members:  # <-- Use the fetched user object
+        if user not in project.members:
             return {'message': 'Unauthorized'}, 403
 
         data = request.get_json()
@@ -42,7 +42,6 @@ class TaskListResource(Resource):
             return {'message': 'Task title is required'}, 400
 
         status = data.get('status', 'TODO')
-        # This logic for finding the max order is great, no changes needed
         max_order = db.session.query(db.func.max(Task.order)).filter_by(
             project_id=project_id, 
             status=status
@@ -69,7 +68,7 @@ class TaskResource(Resource):
     - PUT /api/tasks/<int:task_id>
     - DELETE /api/tasks/<int:task_id>
     """
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def put(self, task_id):
         """
         Updates a task's details (title, description).
@@ -86,7 +85,7 @@ class TaskResource(Resource):
         
         # --- SECURITY CHECK ---
         # We check membership via the task's parent project
-        if user not in task.project.members:  # <-- Use the fetched user object
+        if user not in task.project.members:
             return {'message': 'Unauthorized'}, 403
             
         data = request.get_json()
@@ -96,7 +95,7 @@ class TaskResource(Resource):
         db.session.commit()
         return serialize_task(task), 200
 
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def delete(self, task_id):
         """
         Deletes a task.
@@ -112,7 +111,7 @@ class TaskResource(Resource):
             return {'message': 'Task not found'}, 404
 
         # --- SECURITY CHECK ---
-        if user not in task.project.members:  # <-- Use the fetched user object
+        if user not in task.project.members:
             return {'message': 'Unauthorized'}, 403
             
         db.session.delete(task)
@@ -142,7 +141,7 @@ class TaskMoveResource(Resource):
             return {'message': 'Task not found'}, 404
         
         # --- SECURITY CHECK ---
-        if user not in task.project.members:  # <-- Use the fetched user object
+        if user not in task.project.members:
             return {'message': 'Unauthorized'}, 403
 
         data = request.get_json()

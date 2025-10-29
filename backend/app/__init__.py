@@ -4,9 +4,9 @@ This file contains the application factory for the TaskFlow Flask app.
 
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager  # Import JWTManager
+from flask_jwt_extended import JWTManager
 
-from .models import db, User, Role  # User and Role are still needed for your logic
+from .models import db, User, Role
 from .api import api_bp
 
 def create_app():
@@ -17,13 +17,11 @@ def create_app():
     app = Flask(__name__)
 
     # --- Configuration ---
-    # In a real app, load this from a config file or environment variables
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskflow.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'super-secret-key-change-me' # Used for session, CSRF, etc.
+    app.config['SECRET_KEY'] = 'super-secret-key-change-me'
     
     # Configuration for Flask-JWT-Extended
-    # This key is used to sign the JWTs. Keep it secret!
     app.config['JWT_SECRET_KEY'] = 'super-secret-jwt-key-change-me' 
 
     # --- Initialize Extensions ---
@@ -31,7 +29,6 @@ def create_app():
     CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
     
     # --- Setup Flask-JWT-Extended ---
-    # This initializes the JWT manager
     jwt = JWTManager(app)
 
     # --- Register Blueprints ---

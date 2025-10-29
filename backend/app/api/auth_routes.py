@@ -64,7 +64,6 @@ class LoginResource(Resource):
             access_token = create_access_token(identity=user.id)
             
             # Return the token and user info
-            # Note: The key is 'token' to match your original API response
             return {
                 "message": "Login successful",
                 "token": access_token,
@@ -76,10 +75,6 @@ class LoginResource(Resource):
         else:
             return {"message": "Invalid email or password"}, 401
 
-# --- LogoutResource Removed ---
-# See explanation below
-
 # --- Register the resources with our API ---
 api.add_resource(RegisterResource, '/register')
 api.add_resource(LoginResource, '/login')
-# The LogoutResource is no longer needed

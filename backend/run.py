@@ -11,8 +11,6 @@ app = create_app()
 
 # 2. Use the 'app' instance to create an application context
 with app.app_context():
-    # This creates your database tables based on your models
-    # It's okay for development, but for production, you'd use Flask-Migrate
     db.create_all()
 
 if __name__ == '__main__':

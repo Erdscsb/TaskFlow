@@ -6,14 +6,13 @@ This file defines the RESTful API routes for Projects.
 
 from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import jwt_required, get_jwt_identity  # <-- Imports changed
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import joinedload
 
 from . import api
 from ..models import db, Project, Task, User
 
 # --- Helper Functions for Serialization ---
-# (These functions are unchanged as they are independent of auth)
 
 def serialize_task(task):
     """Converts a Task model object into a JSON-serializable dictionary."""
@@ -58,7 +57,7 @@ class ProjectListResource(Resource):
     - GET /api/projects
     - POST /api/projects
     """
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def get(self):
         """
         Gets all projects the current user is a member of.
@@ -73,7 +72,7 @@ class ProjectListResource(Resource):
         projects = user.projects
         return [serialize_project(p) for p in projects], 200
 
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def post(self):
         """
         Creates a new project.
@@ -96,7 +95,7 @@ class ProjectListResource(Resource):
         )
         
         # Automatically add the creator as a member
-        new_project.members.append(user)  # <-- Use the fetched user object
+        new_project.members.append(user)
         
         db.session.add(new_project)
         db.session.commit()
@@ -110,7 +109,7 @@ class ProjectResource(Resource):
     - PUT /api/projects/<int:project_id>
     - DELETE /api/projects/<int:project_id>
     """
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def get(self, project_id):
         """
         Gets a single project by its ID.
@@ -133,12 +132,12 @@ class ProjectResource(Resource):
 
         # --- SECURITY CHECK ---
         # Verify the current user is a member of this project
-        if user not in project.members:  # <-- Use the fetched user object
+        if user not in project.members:
             return {'message': 'Unauthorized'}, 403
 
         return serialize_project(project, include_tasks=True, include_members=True), 200
 
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def put(self, project_id):
         """
         Updates a project's details (name, description).
@@ -155,7 +154,7 @@ class ProjectResource(Resource):
             return {'message': 'Project not found'}, 404
 
         # --- SECURITY CHECK ---
-        if user not in project.members:  # <-- Use the fetched user object
+        if user not in project.members:
             return {'message': 'Unauthorized'}, 403
 
         data = request.get_json()
@@ -165,7 +164,7 @@ class ProjectResource(Resource):
         
         return serialize_project(project), 200
 
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def delete(self, project_id):
         """
         Deletes a project.
@@ -182,7 +181,7 @@ class ProjectResource(Resource):
             return {'message': 'Project not found'}, 404
 
         # --- SECURITY CHECK ---
-        if user not in project.members:  # <-- Use the fetched user object
+        if user not in project.members:
             return {'message': 'Unauthorized'}, 403
         
         db.session.delete(project)
