@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a new axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: '/api',
 });
 
 // This function will run on *every* request before it's sent
