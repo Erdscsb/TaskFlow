@@ -58,7 +58,7 @@ function DashboardPage() {
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
           />
-          <button type="submit">+ Create</button>
+          <button type="submit">Create</button>
         </form>
       </header>
 
