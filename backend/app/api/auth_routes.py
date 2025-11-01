@@ -61,7 +61,7 @@ class LoginResource(Resource):
         # Check the password hash
         if user and check_password_hash(user.password, password):
             # Create the JWT
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
             
             # Return the token and user info
             return {

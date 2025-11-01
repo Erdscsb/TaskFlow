@@ -49,7 +49,7 @@ class User(db.Model):
 
     # Relationship to Projects (Many-to-Many)
     # A user can be a member of many projects.
-    projects = db.relationship('Project', secondary=project_members, backref=db.backref('members', lazy='dynamic'))
+    projects = db.relationship('Project', secondary=project_members, backref=db.backref('members', lazy=True))
 
 class Project(db.Model):
     """

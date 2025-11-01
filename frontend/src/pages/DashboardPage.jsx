@@ -14,7 +14,7 @@ function DashboardPage() {
     const fetchProjects = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get('/projects');
+        const response = await api.get("/projects");
         setProjects(response.data);
         setError(null);
       } catch (err) {

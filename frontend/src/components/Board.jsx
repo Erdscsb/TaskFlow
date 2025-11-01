@@ -1,91 +1,42 @@
-import React, { useState } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
+import React from 'react';
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import Column from './Column';
 
-function Board({ initialData, onDragEndCallback }) {
-  // Set the board state from the prop
-  const [boardData, setBoardData] = useState(initialData);
+// A helper map to get display titles from the column IDs
+const columnTitles = {
+  TODO: 'To Do',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+};
 
-  const onDragEnd = (result) => {
-    const { destination, source, draggableId } = result;
-
-    // 1. Check if dropped outside a valid area
-    if (!destination) return;
-
-    // 2. Check if dropped in the same place
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }
-
-    // 3. Find the source and destination columns
-    const startColumn = boardData.columns[source.droppableId];
-    const endColumn = boardData.columns[destination.droppableId];
-
-    // 4. Handle reordering within the same column
-    if (startColumn === endColumn) {
-      const newTaskIds = Array.from(startColumn.taskIds);
-      newTaskIds.splice(source.index, 1);
-      newTaskIds.splice(destination.index, 0, draggableId);
-
-      const newColumn = { ...startColumn, taskIds: newTaskIds };
-
-      const newState = {
-        ...boardData,
-        columns: {
-          ...boardData.columns,
-          [newColumn.id]: newColumn,
-        },
-      };
-      setBoardData(newState); // Optimistic UI update
-      
-      onDragEndCallback(result, newState);
-      return;
-    }
-
-    // 5. Handle moving between columns
-    const startTaskIds = Array.from(startColumn.taskIds);
-    startTaskIds.splice(source.index, 1);
-    const newStartColumn = {
-      ...startColumn,
-      taskIds: startTaskIds,
-    };
-
-    const endTaskIds = Array.from(endColumn.taskIds);
-    endTaskIds.splice(destination.index, 0, draggableId);
-    const newEndColumn = {
-      ...endColumn,
-      taskIds: endTaskIds,
-    };
-
-    const newState = {
-      ...boardData,
-      columns: {
-        ...boardData.columns,
-        [newStartColumn.id]: newStartColumn,
-        [newEndColumn.id]: newEndColumn,
-      },
-    };
-    setBoardData(newState); // Optimistic UI update
-
-    onDragEndCallback(result, newState);
-  };
-
+function Board({ columnIds, tasksByColumn }) {
+  
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="board">
-        {boardData.columnOrder.map((columnId) => {
-          const column = boardData.columns[columnId];
-          const tasks = column.taskIds.map(
-            (taskId) => boardData.tasks[taskId]
-          );
+    <div className="board">
+      {/* This context is for sorting the *columns* themselves.
+        We pass the array of column IDs as `items`.
+      */}
+      <SortableContext
+        items={columnIds}
+        strategy={horizontalListSortingStrategy}
+      >
+        {columnIds.map((columnId) => {
+          // Get the array of tasks for this specific column
+          const tasks = tasksByColumn[columnId];
+
+          // Create the 'column' object that the <Column> component expects
+          const column = {
+            id: columnId,
+            title: columnTitles[columnId] || 'Column',
+          };
 
           return <Column key={column.id} column={column} tasks={tasks} />;
         })}
-      </div>
-    </DragDropContext>
+      </SortableContext>
+    </div>
   );
 }
 

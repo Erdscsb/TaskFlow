@@ -1,25 +1,42 @@
 import React from 'react';
-import { Droppable } from 'react-beautiful-dnd';
+import { useDroppable } from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
 import TaskCard from './TaskCard';
 
 function Column({ column, tasks }) {
+  // 1. Make the column a droppable area
+  const { setNodeRef, isOver } = useDroppable({
+    id: column.id,
+  });
+
+  // 2. Create an array of task IDs for the SortableContext
+  const taskIds = tasks.map((task) => task.id);
+
   return (
-    <div className="column">
+    <div
+      ref={setNodeRef} // Attach the droppable ref to the main column element
+      className="column"
+    >
       <h3 className="column-title">{column.title}</h3>
-      <Droppable droppableId={column.id}>
-        {(provided, snapshot) => (
-          <div
-            className={`column-task-list ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-          >
-            {tasks.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} />
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
+
+      {/* This component makes all children sortable */}
+      <SortableContext
+        items={taskIds}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          className={`column-task-list ${isOver ? 'dragging-over' : ''}`}
+        >
+          {tasks.map((task) => (
+            // The TaskCard component itself will be made draggable/sortable
+            <TaskCard key={task.id} id={task.id} task={task} />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 }
