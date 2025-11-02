@@ -1,0 +1,156 @@
+/* File: frontend/src/components/TaskModal.css */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  padding: 24px 32px;
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0,0,0,0.1));
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 1001;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+}
+.modal-close:hover {
+  color: var(--text-primary, #1e293b);
+}
+
+.modal-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  border: none;
+  border-bottom: 2px solid var(--border, #e2e8f0);
+  width: 100%;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+.modal-title:focus {
+  outline: none;
+  border-color: var(--primary, #6366f1);
+}
+
+.modal-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.modal-description {
+  width: 100%;
+  min-height: 100px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 24px;
+}
+
+.modal-meta {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.modal-date-input {
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.user-badge.creator {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.user-badge.assignee {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.assignees-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  min-height: 20px;
+}
+
+.assignees-list .user-badge button {
+  background: none;
+  border: none;
+  color: #065f46;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+}
+.assignees-list .user-badge button:hover {
+  opacity: 1;
+}
+
+.empty-text {
+  font-size: 0.9rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+}
+
+.modal-assign-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: 24px;
+}
+
+.modal-save-button {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background: var(--primary, #6366f1);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-save-button:hover {
+  background: var(--primary-dark, #4f46e5);
+}

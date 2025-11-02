@@ -8,10 +8,25 @@ This file defines the RESTful API routes for Tasks.
 from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import datetime
 
 from . import api
 from ..models import db, Project, Task, User
 from .project_routes import serialize_task
+
+# --- Helper function to parse dates ---
+def parse_iso_date(date_string):
+    """Safely parses an ISO date string, returns None if invalid."""
+    if not date_string:
+        return None
+    try:
+        # Handles 'YYYY-MM-DD' by converting to full datetime
+        if len(date_string) == 10:
+             return datetime.strptime(date_string, '%Y-%m-%d')
+        # Handles full ISO 8601 format
+        return datetime.fromisoformat(date_string.replace('Z', '+00:00'))
+    except ValueError:
+        return None
 
 class TaskListResource(Resource):
     """
@@ -54,12 +69,17 @@ class TaskListResource(Resource):
             description=data.get('description'),
             status=status,
             order=new_order,
-            project_id=project_id
+            project_id=project_id,
+            creator_id=current_user_id,
+            expiry_date=parse_iso_date(data.get('expiry_date'))
         )
         
         db.session.add(new_task)
         db.session.commit()
-        
+
+        db.session.refresh(new_task)
+
+        new_task = Task.query.get(new_task.id)
         return serialize_task(new_task), 201
 
 class TaskResource(Resource):
@@ -91,8 +111,13 @@ class TaskResource(Resource):
         data = request.get_json()
         task.title = data.get('title', task.title)
         task.description = data.get('description', task.description)
+
+        if 'expiry_date' in data:
+            task.expiry_date = parse_iso_date(data.get('expiry_date'))
         
         db.session.commit()
+
+        task = Task.query.get(task_id)
         return serialize_task(task), 200
 
     @jwt_required()
@@ -153,9 +178,96 @@ class TaskMoveResource(Resource):
             task.order = data['order']
             
         db.session.commit()
+
+        task = Task.query.get(task_id)
+        return serialize_task(task), 200
+
+class TaskAssignResource(Resource):
+    """
+    Handles assigning/unassigning users to a task.
+    - POST /api/tasks/<int:task_id>/assign
+    - DELETE /api/tasks/<int:task_id>/assign
+    """
+    @jwt_required()
+    def post(self, task_id):
+        """
+        Assigns a user to a task.
+        Expects JSON: { "user_id": ... }
+        """
+        # --- Get the current user ---
+        current_user_id = get_jwt_identity()
+        acting_user = User.query.get(current_user_id)
+        if not acting_user:
+            return {'message': 'User not found'}, 401
+            
+        task = Task.query.get(task_id)
+        if not task:
+            return {'message': 'Task not found'}, 404
+
+        # --- SECURITY CHECK 1: Acting user must be member of project ---
+        if acting_user not in task.project.members:
+            return {'message': 'Unauthorized'}, 403
+
+        data = request.get_json()
+        user_to_assign_id = data.get('user_id')
+        if not user_to_assign_id:
+            return {'message': 'user_id is required'}, 400
+
+        user_to_assign = User.query.get(user_to_assign_id)
+        if not user_to_assign:
+            return {'message': 'User to assign not found'}, 404
+
+        # --- SECURITY CHECK 2: User to assign must also be member of project ---
+        if user_to_assign not in task.project.members:
+            return {'message': 'User to assign is not a member of this project'}, 403
+            
+        # Add user to assignees if not already assigned
+        if user_to_assign not in task.assignees:
+            task.assignees.append(user_to_assign)
+            db.session.commit()
+            
+        task = Task.query.get(task_id)
+        return serialize_task(task), 200
+
+    @jwt_required()
+    def delete(self, task_id):
+        """
+        Unassigns a user from a task.
+        Expects JSON: { "user_id": ... }
+        """
+        # --- Get the current user ---
+        current_user_id = get_jwt_identity()
+        acting_user = User.query.get(current_user_id)
+        if not acting_user:
+            return {'message': 'User not found'}, 401
+            
+        task = Task.query.get(task_id)
+        if not task:
+            return {'message': 'Task not found'}, 404
+
+        # --- SECURITY CHECK 1: Acting user must be member of project ---
+        if acting_user not in task.project.members:
+            return {'message': 'Unauthorized'}, 403
+            
+        data = request.get_json()
+        user_to_unassign_id = data.get('user_id')
+        if not user_to_unassign_id:
+            return {'message': 'user_id is required'}, 400
+            
+        user_to_unassign = User.query.get(user_to_unassign_id)
+        if not user_to_unassign:
+            return {'message': 'User to unassign not found'}, 404
+
+        # Remove user from assignees if they are assigned
+        if user_to_unassign in task.assignees:
+            task.assignees.remove(user_to_unassign)
+            db.session.commit()
+
+        task = Task.query.get(task_id)
         return serialize_task(task), 200
 
 # --- Register the resources with our API ---
 api.add_resource(TaskListResource, '/projects/<int:project_id>/tasks')
 api.add_resource(TaskResource, '/tasks/<int:task_id>')
 api.add_resource(TaskMoveResource, '/tasks/<int:task_id>/move')
+api.add_resource(TaskAssignResource, '/tasks/<int:task_id>/assign')

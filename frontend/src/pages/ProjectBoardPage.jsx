@@ -12,7 +12,8 @@ import { arrayMove } from '@dnd-kit/sortable';
 
 import api from '../services/api';
 import Board from '../components/Board.jsx';
-import TaskCard from '../components/TaskCard.jsx'; 
+import TaskCard from '../components/TaskCard.jsx';
+import TaskModal from '../components/TaskModal.jsx'; 
 import './ProjectBoardPage.css';
 
 // Define the column IDs
@@ -23,6 +24,7 @@ function ProjectBoardPage() {
   const [project, setProject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
 
   const [tasksByColumn, setTasksByColumn] = useState({
     TODO: [],
@@ -32,6 +34,9 @@ function ProjectBoardPage() {
   
   // This state holds the task that is currently being dragged
   const [activeTask, setActiveTask] = useState(null);
+
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [newTaskExpiry, setNewTaskExpiry] = useState('');
 
   // Helper function to find a task by its ID across all columns
   const findTask = (taskId) => {
@@ -91,6 +96,71 @@ function ProjectBoardPage() {
     })
   );
 
+const handleTaskClick = (task) => {
+    // Find the most up-to-date version of the task from our state
+    const { task: fullTask } = findTask(task.id);
+    setSelectedTask(fullTask);
+  };
+
+const handleUpdateTask = (updatedTask) => {
+    // This function updates the state locally without a full refetch
+    setTasksByColumn((prev) => {
+      const newColumns = { ...prev };
+      
+      // Find and remove the old task from all columns
+      for (const columnId of columnIds) {
+        newColumns[columnId] = newColumns[columnId].filter(
+          (t) => t.id !== updatedTask.id
+        );
+      }
+      
+      // Add the updated task to its new column
+      if (newColumns[updatedTask.status]) {
+         newColumns[updatedTask.status].push(updatedTask);
+         // Re-sort that column
+         newColumns[updatedTask.status].sort((a, b) => a.order - b.order);
+      }
+      
+      return newColumns;
+    });
+
+    // Also update the task if it's the one in the modal
+    setSelectedTask(updatedTask);
+  };
+
+const handleCreateTask = async (e) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) {
+      alert('Task title cannot be empty');
+      return;
+    }
+
+    try {
+      // Use the backend endpoint to create a new task
+      await api.post(`/projects/${projectId}/tasks`, {
+        title: newTaskTitle,
+        expiry_date: newTaskExpiry || null,
+      });
+
+      const newTask = response.data;
+      setTasksByColumn(prev => ({
+        ...prev,
+        [newTask.status]: [...prev[newTask.status], newTask].sort((a,b) => a.order - b.order)
+      }));
+
+      // Clear the input field
+      setNewTaskTitle('');
+      setNewTaskExpiry('');
+      
+      // Refresh the entire board to show the new task
+      fetchProjectData(); 
+
+    } catch (err) {
+      console.error('Error creating task:', err);
+      setError('Failed to create a new task.');
+    }
+  };
+
   // --- dnd-kit HANDLERS ---
 
   function onDragStart(event) {
@@ -125,28 +195,51 @@ function ProjectBoardPage() {
     
     // Find new index
     let newIndex;
-    if (tasksByColumn[over.id]) {
+    const isOverAColumn = tasksByColumn[over.id];
+
+    if (isOverAColumn) {
       // Dropped on an empty column
       newIndex = tasksByColumn[over.id].length;
     } else {
       // Dropped on a task, find its index
       newIndex = tasksByColumn[overColumnId].findIndex((t) => t.id === over.id);
+      if (newIndex === -1) {
+         newIndex = tasksByColumn[overColumnId].length;
+      }
     }
 
+    // 1. Update state immediately
+    setTasksByColumn(prev => {
+        const newColumns = { ...prev };
+        
+        // Remove from old column
+        newColumns[originalColumnId] = prev[originalColumnId].filter(
+          t => t.id !== active.id
+        );
+        
+        // Create new task object for insertion
+        const movedTask = { ...activeTask, status: overColumnId, order: newIndex };
+        
+        // Insert into new column at the correct position
+        const newColumnTasks = [...prev[overColumnId]];
+        newColumnTasks.splice(newIndex, 0, movedTask);
+        
+        newColumns[overColumnId] = newColumnTasks;
+        
+        return newColumns;
+    });
+
     // Call the backend to move the task
-    // We send the task ID, the new status (column ID), and its new order (index)
-    // This matches the backend API: PATCH /api/tasks/<id>/move
     api.patch(`/tasks/${activeTask.id}/move`, {
         status: overColumnId,
         order: newIndex,
       })
-      .then(() => {
-        // Success! Refetch data from server to ensure sync
-        fetchProjectData();
+      .then(response => {
+        handleUpdateTask(response.data);
       })
       .catch((err) => {
         console.error('Failed to move task:', err);
-        // On failure, refetch to revert any optimistic changes (if we had them)
+        // On failure, refetch to revert any optimistic changes
         // and show the error.
         setError('Failed to update task position. Reverting.');
         fetchProjectData(); // Re-sync with the server's state
@@ -169,6 +262,23 @@ function ProjectBoardPage() {
       <h1 className="project-title">{project.name}</h1>
       <p className="project-description">{project.description}</p>
 
+      <form className="new-task-form" onSubmit={handleCreateTask}>
+        <input
+          type="text"
+          placeholder="New Task Title"
+          value={newTaskTitle}
+          name="taskTitle"
+          onChange={(e) => setNewTaskTitle(e.target.value)}
+        />
+        <input
+          type="date"
+          className="new-task-date"
+          value={newTaskExpiry}
+          onChange={(e) => setNewTaskExpiry(e.target.value)}
+        />
+        <button type="submit">Add Task</button>
+      </form>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -178,6 +288,7 @@ function ProjectBoardPage() {
         <Board
           columnIds={columnIds}
           tasksByColumn={tasksByColumn}
+          onTaskClick={handleTaskClick}
         />
         
         {/* This renders the "floating" card that follows the pointer */}
@@ -185,6 +296,16 @@ function ProjectBoardPage() {
           {activeTask ? <TaskCard task={activeTask} isDragging /> : null}
         </DragOverlay>
       </DndContext>
+
+      {/* --- RENDER THE MODAL --- */}
+      {selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          projectMembers={project.members || []}
+          onUpdateTask={handleUpdateTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
 
 import TaskCard from './TaskCard';
 
-function Column({ column, tasks }) {
+function Column({ column, tasks, onTaskClick }) {
   // 1. Make the column a droppable area
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -32,8 +32,7 @@ function Column({ column, tasks }) {
           className={`column-task-list ${isOver ? 'dragging-over' : ''}`}
         >
           {tasks.map((task) => (
-            // The TaskCard component itself will be made draggable/sortable
-            <TaskCard key={task.id} id={task.id} task={task} />
+            <TaskCard key={task.id} id={task.id} task={task} onTaskClick={onTaskClick} />
           ))}
         </div>
       </SortableContext>

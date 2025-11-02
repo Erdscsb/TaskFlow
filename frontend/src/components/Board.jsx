@@ -12,7 +12,7 @@ const columnTitles = {
   DONE: 'Done',
 };
 
-function Board({ columnIds, tasksByColumn }) {
+function Board({ columnIds, tasksByColumn, onTaskClick }) {
   
   return (
     <div className="board">
@@ -33,7 +33,7 @@ function Board({ columnIds, tasksByColumn }) {
             title: columnTitles[columnId] || 'Column',
           };
 
-          return <Column key={column.id} column={column} tasks={tasks} />;
+          return <Column key={column.id} column={column} tasks={tasks} onTaskClick={onTaskClick} />;
         })}
       </SortableContext>
     </div>

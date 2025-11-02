@@ -8,6 +8,8 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
+from datetime import datetime
 
 from . import api
 from ..models import db, Project, Task, User
@@ -22,7 +24,16 @@ def serialize_task(task):
         'description': task.description,
         'status': task.status,
         'order': task.order,
-        'project_id': task.project_id
+        'project_id': task.project_id,
+
+        # Convert expiry_date to ISO format string if it exists
+        'expiry_date': task.expiry_date.isoformat() if task.expiry_date else None,
+        
+        # Include the creator's details
+        'creator': serialize_project_member(task.creator) if task.creator else None,
+        
+        # Include the list of assignees
+        'assignees': [serialize_project_member(user) for user in task.assignees]
     }
 
 def serialize_project_member(user):
@@ -69,8 +80,12 @@ class ProjectListResource(Resource):
         if not user:
             return {'message': 'User not found'}, 401
 
+        projects = Project.query.filter(Project.members.any(id=user.id)).options(
+            selectinload(Project.members)
+        ).all()
+
         projects = user.projects
-        return [serialize_project(p) for p in projects], 200
+        return [serialize_project(p, include_members=False) for p in projects], 200
 
     @jwt_required()
     def post(self):
@@ -100,7 +115,7 @@ class ProjectListResource(Resource):
         db.session.add(new_project)
         db.session.commit()
         
-        return serialize_project(new_project), 201
+        return serialize_project(new_project, include_members=True), 201
 
 class ProjectResource(Resource):
     """
@@ -123,8 +138,11 @@ class ProjectResource(Resource):
             return {'message': 'User not found'}, 401
 
         project = Project.query.options(
-            joinedload(Project.tasks),
-            joinedload(Project.members)
+            selectinload(Project.tasks).options(
+                selectinload(Task.assignees),  # Eager load assignees for each task
+                joinedload(Task.creator)      # Eager load creator for each task
+            ),
+            selectinload(Project.members)     # Eager load project members
         ).get(project_id)
 
         if not project:

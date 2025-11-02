@@ -5,6 +5,7 @@ many-to-many association tables.
 """
 
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 # Initialize the SQLAlchemy extension.
 db = SQLAlchemy()
@@ -22,6 +23,11 @@ roles_users = db.Table('roles_users',
 project_members = db.Table('project_members',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+)
+
+task_assignees = db.Table('task_assignees',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('task_id', db.Integer, db.ForeignKey('task.id'), primary_key=True)
 )
 
 # --- Model Definitions ---
@@ -51,6 +57,12 @@ class User(db.Model):
     # A user can be a member of many projects.
     projects = db.relationship('Project', secondary=project_members, backref=db.backref('members', lazy=True))
 
+    # Tasks a user is assigned to
+    assigned_tasks = db.relationship('Task', secondary=task_assignees, backref=db.backref('assignees', lazy=True))
+    
+    # Tasks a user has created
+    created_tasks = db.relationship('Task', backref='creator', lazy=True, foreign_keys='Task.creator_id')
+
 class Project(db.Model):
     """
     Represents a project, which is a container for tasks.
@@ -74,6 +86,11 @@ class Task(db.Model):
     
     # This 'order' column will be used to maintain the position of the task within its status column.
     order = db.Column(db.Integer, nullable=False, default=0)
+
+    expiry_date = db.Column(db.DateTime, nullable=True)
+
+    # Foreign Key for Creator (User)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # Nullable in case creator is deleted
 
     # Foreign Key to link Task to a Project
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
