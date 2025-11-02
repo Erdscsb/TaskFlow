@@ -9,15 +9,15 @@ import ProjectBoardPage from './pages/ProjectBoardPage.jsx';
 import Navbar from './components/Navbar.jsx';
 
 function App() {
-  const { token } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="App">
-      {token && <Navbar />}
+      {user && <Navbar />}
       
       <main>
         <Routes>
-          {token ? (
+          {user ? (
             /* --- Protected Routes (User is Logged In) --- */
             <>
               <Route path="/dashboard" element={<DashboardPage />} />

@@ -14,36 +14,31 @@ export function AuthProvider({ children }) {
         }
     });
 
-    // --- CHANGE 1: Store the token in state ---
-    // This makes the context "reactive" to token changes.
-    const [token, setToken] = useState(() => localStorage.getItem('token'));
-
     const login = useCallback(async (email, password) => {
         try {
             const response = await api.post('/login', { email, password });
-            const { user, token } = response.data;
+            const { user } = response.data;
             
             // Set the state
             setUser(user);
-            setToken(token); // <-- Add this
             
             // Persist to localStorage
-            localStorage.setItem('appUser', JSON.stringify(user));
-            localStorage.setItem('token', token);
+            localStorage.setItem('appUser', JSON.stringify(user));  
         } catch (error) {
             console.error('Login failed', error.response?.data);
             alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
         }
     }, []);
 
-    const logout = useCallback(() => {
-        // Clear the state
-        setUser(null);
-        setToken(null); // <-- Add this
+    const logout = useCallback(async () => {
+        try {
+            await api.post('/logout');
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
         
-        // Remove from localStorage
+        setUser(null);
         localStorage.removeItem('appUser');
-        localStorage.removeItem('token');
     }, []);
 
     const register = useCallback(async (email, password) => {
@@ -58,11 +53,10 @@ export function AuthProvider({ children }) {
 
     const value = useMemo(() => ({
         user,
-        token, // <-- CHANGE 2: Use the token from state
         login,
         logout,
         register
-    }), [user, token, login, logout, register]); // <-- CHANGE 3: Add token to dependency array
+    }), [user, login, logout, register]);
 
     return (
         <AuthContext.Provider value={value}>
