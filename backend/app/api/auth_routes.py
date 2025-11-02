@@ -2,14 +2,17 @@
 This file defines the RESTful API routes for authentication.
 - /api/register
 - /api/login
-- /api/logout (Note: Logout is handled client-side with stateless JWTs)
+- /api/logout
+- /api/me
 """
 
 from flask import jsonify, request
 from flask_restful import Resource
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
-
+from flask_jwt_extended import (
+    create_access_token, set_access_cookies, unset_jwt_cookies,
+    jwt_required, get_jwt_identity
+)
 from . import api                # Import the api object from app/api/__init__.py
 from ..models import db, User
 
@@ -84,7 +87,28 @@ class LogoutResource(Resource):
         unset_jwt_cookies(response)
         return response
 
+class ProfileResource(Resource):
+    @jwt_required()
+    def get(self):
+        """
+        Gets the profile for the currently authenticated user.
+        """
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if not user:
+            return {"message": "User not found"}, 404
+
+        # Return the same user object as the login route
+        return {
+            "user": {
+                "id": user.id,
+                "email": user.email
+            }
+        }
+
 # --- Register the resources with our API ---
 api.add_resource(RegisterResource, '/register')
 api.add_resource(LoginResource, '/login')
 api.add_resource(LogoutResource, '/logout')
+api.add_resource(ProfileResource, '/me')

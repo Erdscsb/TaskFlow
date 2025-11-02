@@ -9,7 +9,11 @@ import ProjectBoardPage from './pages/ProjectBoardPage.jsx';
 import Navbar from './components/Navbar.jsx';
 
 function App() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="App">

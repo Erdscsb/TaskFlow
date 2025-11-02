@@ -1,18 +1,29 @@
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import api from '../services/api'; // Make sure this file is updated! (See below)
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem('appUser');
-        try {
-            return storedUser ? JSON.parse(storedUser) : null;
-        } catch (error) {
-            console.error("Failed to parse user from localStorage", error);
-            return null;
-        }
-    });
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // This runs once when the app loads to check if the user is already logged in
+    useEffect(() => {
+        const checkUser = async () => {
+            try {
+                const response = await api.get('/me');
+                // If successful, set the user
+                setUser(response.data.user);
+            } catch (error) {
+                // If it fails (401, etc.), the user is not logged in
+                setUser(null);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkUser();
+    }, []); // Empty dependency array = runs once on mount
 
     const login = useCallback(async (email, password) => {
         try {
@@ -22,8 +33,6 @@ export function AuthProvider({ children }) {
             // Set the state
             setUser(user);
             
-            // Persist to localStorage
-            localStorage.setItem('appUser', JSON.stringify(user));  
         } catch (error) {
             console.error('Login failed', error.response?.data);
             alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
@@ -38,7 +47,6 @@ export function AuthProvider({ children }) {
         }
         
         setUser(null);
-        localStorage.removeItem('appUser');
     }, []);
 
     const register = useCallback(async (email, password) => {
@@ -53,10 +61,11 @@ export function AuthProvider({ children }) {
 
     const value = useMemo(() => ({
         user,
+        isLoading,
         login,
         logout,
         register
-    }), [user, login, logout, register]);
+    }), [user, isLoading, login, logout, register]);
 
     return (
         <AuthContext.Provider value={value}>
