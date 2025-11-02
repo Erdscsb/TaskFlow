@@ -19,7 +19,6 @@ function LoginPage() {
       await login(email, password);
       navigate('/dashboard');
     } catch (error) {
-      // Error is already handled in the AuthContext, but you could add specific UI feedback here if needed
     }
   };
 
@@ -33,6 +32,7 @@ function LoginPage() {
             type="email"
             id="email"
             value={email}
+            autoComplete='email'
             onChange={(e) => setEmail(e.target.value)}
             required
           />

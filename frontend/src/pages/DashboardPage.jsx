@@ -55,6 +55,7 @@ function DashboardPage() {
           <input
             type="text"
             placeholder="New Project Name"
+            name="projectName"
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
           />
