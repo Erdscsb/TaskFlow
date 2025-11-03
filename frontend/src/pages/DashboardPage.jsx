@@ -43,6 +43,23 @@ function DashboardPage() {
     }
   };
 
+  const handleDeleteProject = async (e, projectId) => {
+    // Stop the <Link> from navigating
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (window.confirm("Are you sure you want to permanently delete this project and all its tasks?")) {
+      try {
+        await api.delete(`/projects/${projectId}`);
+        // Remove the project from the local state
+        setProjects(projects.filter(p => p.id !== projectId));
+      } catch (err) {
+        console.error("Error deleting project:", err);
+        setError("Failed to delete project.");
+      }
+    }
+  };
+
   if (isLoading) {
     return <div className="dashboard-container">Loading...</div>;
   }
@@ -73,6 +90,14 @@ function DashboardPage() {
             <Link to={`/project/${project.id}`} key={project.id} className="project-card">
               <h3>{project.name}</h3>
               <p>{project.description || 'No description'}</p>
+
+              <button 
+                onClick={(e) => handleDeleteProject(e, project.id)} 
+                className="project-card-delete-btn"
+                title="Delete project"
+              >
+                &times;
+              </button>
             </Link>
           ))
         )}

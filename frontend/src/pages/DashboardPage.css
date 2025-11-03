@@ -263,3 +263,40 @@
 .project-card {
   animation: cardAppear 0.4s ease-out;
 }
+
+.project-card-delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  z-index: 2;
+  
+  background: var(--error, #ef4444); 
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 28px;
+  text-align: center;
+  
+  cursor: pointer;
+  
+  /* Hide by default, show on card hover */
+  opacity: 0; 
+  transition: var(--transition);
+  transform: scale(0.8);
+}
+
+.project-card:hover .project-card-delete-btn {
+  opacity: 1; /* Show on hover */
+  transform: scale(1);
+}
+
+.project-card-delete-btn:hover {
+  background: #c0392b; /* Darker red */
+  transform: scale(1.1) rotate(90deg);
+}
