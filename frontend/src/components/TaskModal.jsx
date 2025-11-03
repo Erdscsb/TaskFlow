@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import './TaskModal.css';
 
-function TaskModal({ task, projectMembers, onUpdateTask, onClose }) {
+function TaskModal({ task, projectMembers, onUpdateTask, onClose, onDeleteTask }) {
   // --- State for Editable Fields ---
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
@@ -11,10 +11,8 @@ function TaskModal({ task, projectMembers, onUpdateTask, onClose }) {
   const initialDate = task.expiry_date ? task.expiry_date.split('T')[0] : '';
   const [expiryDate, setExpiryDate] = useState(initialDate);
 
-  // --- Helper to get available users to assign ---
-  const assignableMembers = projectMembers.filter(
-    (pm) => !task.assignees.find((a) => a.id === pm.id)
-  );
+  const [assignees, setAssignees] = useState(task.assignees || []); // task.assignees is string[]
+  const [newAssignee, setNewAssignee] = useState('');
   
   // --- API Handlers ---
 
@@ -23,7 +21,8 @@ function TaskModal({ task, projectMembers, onUpdateTask, onClose }) {
       const response = await api.put(`/tasks/${task.id}`, {
         title: title,
         description: description,
-        expiry_date: expiryDate || null, // Send null if empty
+        expiry_date: expiryDate || null,
+        assignees: assignees,
       });
       onUpdateTask(response.data); // Update the task in the parent state
       onClose(); // Close the modal
@@ -33,29 +32,29 @@ function TaskModal({ task, projectMembers, onUpdateTask, onClose }) {
     }
   };
 
-  const handleAssignUser = async (userId) => {
-    try {
-      const response = await api.post(`/tasks/${task.id}/assign`, {
-        user_id: userId,
-      });
-      onUpdateTask(response.data); // Update parent state
-    } catch (err) {
-      console.error('Failed to assign user', err);
-      alert('Failed to assign user.');
+  const handleAddAssignee = (e) => {
+    e.preventDefault();
+    const trimmedName = newAssignee.trim();
+    if (trimmedName && !assignees.includes(trimmedName)) {
+      setAssignees([...assignees, trimmedName]);
     }
+    setNewAssignee(''); // Clear input
   };
 
-  const handleUnassignUser = async (userId) => {
-    try {
-      // The backend expects a 'delete' request with a 'body',
-      // which is why we use the 'data' key here.
-      const response = await api.delete(`/tasks/${task.id}/assign`, {
-        data: { user_id: userId },
-      });
-      onUpdateTask(response.data); // Update parent state
-    } catch (err) {
-      console.error('Failed to unassign user', err);
-      alert('Failed to unassign user.');
+  const handleRemoveAssignee = (indexToRemove) => {
+    setAssignees(assignees.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleDeleteTask = async () => {
+    if (window.confirm("Are you sure you want to delete this task permanently?")) {
+      try {
+        await api.delete(`/tasks/${task.id}`);
+        onDeleteTask(task.id); // Tell the parent board to remove it
+        onClose(); // Close the modal
+      } catch (err) {
+        console.error("Failed to delete task", err);
+        alert("Failed to delete task.");
+      }
     }
   };
   
@@ -106,32 +105,33 @@ function TaskModal({ task, projectMembers, onUpdateTask, onClose }) {
         {/* --- Assignees --- */}
         <p className="modal-label">Assignees</p>
         <div className="assignees-list">
-          {task.assignees.length === 0 && <p className="empty-text">No one assigned.</p>}
-          {task.assignees.map(user => (
-            <span key={user.id} className="user-badge assignee">
-              {user.email}
-              <button onClick={() => handleUnassignUser(user.id)}>&times;</button>
+          {assignees.length === 0 && <p className="empty-text">No one assigned.</p>}
+          {assignees.map((name, index) => (
+            <span key={index} className="user-badge assignee">
+              {name}
+              <button onClick={() => handleRemoveAssignee(index)}>&times;</button>
             </span>
           ))}
         </div>
 
-        {/* --- Assign New User Dropdown --- */}
-        {assignableMembers.length > 0 && (
-          <select 
-            className="modal-assign-select"
-            onChange={(e) => handleAssignUser(e.target.value)}
-            value=""
-          >
-            <option value="" disabled>Assign a project member...</option>
-            {assignableMembers.map(user => (
-              <option key={user.id} value={user.id}>{user.email}</option>
-            ))}
-          </select>
-        )}
+        <form className="modal-assign-form" onSubmit={handleAddAssignee}>
+          <input
+            type="text"
+            value={newAssignee}
+            onChange={(e) => setNewAssignee(e.target.value)}
+            placeholder="Assign a new person..."
+          />
+          <button type="submit">Add</button>
+        </form>
         
-        <button className="modal-save-button" onClick={handleSaveChanges}>
-          Save Changes
-        </button>
+        <div className="modal-footer">
+          <button className="modal-save-button" onClick={handleSaveChanges} style={{width: 'auto'}}>
+            Save Changes
+          </button>
+          <button className="modal-delete-button" onClick={handleDeleteTask}>
+            Delete Task
+          </button>
+        </div>
       </div>
     </div>
   );

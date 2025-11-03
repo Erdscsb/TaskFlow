@@ -128,6 +128,20 @@ const handleUpdateTask = (updatedTask) => {
     setSelectedTask(updatedTask);
   };
 
+// --- ADDED: Handler to remove a task from state ---
+  const handleDeleteTaskInBoard = (taskId) => {
+    setTasksByColumn((prev) => {
+      const newColumns = { ...prev };
+      // Find and remove the task from whichever column it's in
+      for (const columnId of columnIds) {
+        newColumns[columnId] = newColumns[columnId].filter(
+          (t) => t.id !== taskId
+        );
+      }
+      return newColumns;
+    });
+  };
+
 const handleCreateTask = async (e) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) {
@@ -137,7 +151,7 @@ const handleCreateTask = async (e) => {
 
     try {
       // Use the backend endpoint to create a new task
-      await api.post(`/projects/${projectId}/tasks`, {
+      const response = await api.post(`/projects/${projectId}/tasks`, {
         title: newTaskTitle,
         expiry_date: newTaskExpiry || null,
       });
@@ -151,9 +165,6 @@ const handleCreateTask = async (e) => {
       // Clear the input field
       setNewTaskTitle('');
       setNewTaskExpiry('');
-      
-      // Refresh the entire board to show the new task
-      fetchProjectData(); 
 
     } catch (err) {
       console.error('Error creating task:', err);
@@ -303,6 +314,7 @@ const handleCreateTask = async (e) => {
           task={selectedTask}
           projectMembers={project.members || []}
           onUpdateTask={handleUpdateTask}
+          onDeleteTask={handleDeleteTaskInBoard}
           onClose={() => setSelectedTask(null)}
         />
       )}

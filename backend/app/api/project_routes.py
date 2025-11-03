@@ -10,6 +10,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import joinedload, selectinload
 from datetime import datetime
+import json
 
 from . import api
 from ..models import db, Project, Task, User
@@ -33,7 +34,7 @@ def serialize_task(task):
         'creator': serialize_project_member(task.creator) if task.creator else None,
         
         # Include the list of assignees
-        'assignees': [serialize_project_member(user) for user in task.assignees]
+        'assignees': task.assignees
     }
 
 def serialize_project_member(user):
@@ -139,7 +140,6 @@ class ProjectResource(Resource):
 
         project = Project.query.options(
             selectinload(Project.tasks).options(
-                selectinload(Task.assignees),  # Eager load assignees for each task
                 joinedload(Task.creator)      # Eager load creator for each task
             ),
             selectinload(Project.members)     # Eager load project members

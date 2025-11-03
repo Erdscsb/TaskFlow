@@ -55,9 +55,9 @@ function TaskCard({ task, id, isDragging, onTaskClick }) {
           </span>
         )}
         <div className="task-card-assignees">
-          {task.assignees.map(user => (
-            <span key={user.id} className="mini-avatar" title={user.email}>
-              {user.email.substring(0, 1).toUpperCase()}
+          {task.assignees.map((name, index) => (
+            <span key={index} className="mini-avatar" title={name}>
+              {name.substring(0, 1).toUpperCase()}
             </span>
           ))}
         </div>

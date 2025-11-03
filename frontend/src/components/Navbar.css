@@ -1,0 +1,68 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2.5rem; /* 16px 40px */
+  background: var(--surface-primary, #ffffff);
+  border-bottom: 1px solid var(--border-primary, #e2e8f0);
+  box-shadow: var(--shadow-md);
+  
+  /* Make it stick to the top */
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  width: 100%;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  
+  /* Gradient text to match dashboard/auth headers */
+  background: linear-gradient(135deg, var(--primary-600, #4f46e5) 0%, var(--primary-400, #818cf8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: transform 0.2s ease;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.02);
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* 16px */
+}
+
+.navbar-user {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.navbar-logout {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  background: transparent;
+  border: 1px solid var(--border-primary, #e2e8f0);
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-logout:hover {
+  background: var(--surface-secondary, #f8fafc);
+  color: var(--text-primary, #1e293b);
+  border-color: var(--border-secondary, #cbd5e1);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-logout:active {
+  transform: translateY(0);
+}
