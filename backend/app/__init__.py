@@ -26,17 +26,17 @@ def create_app():
     
     # Configuration for Flask-JWT-Extended
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-key-change-me')
-
+ 
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'super-secret-jwt-key-change-me')
 
     # Tells JWT-Extended to set a "csrf_access_token" cookie
-    app.config['JWT_CSRF_IN_COOKIES'] = True 
+    app.config['JWT_CSRF_IN_COOKIES'] = True # Enable CSRF protection
     # Enables checking for the X-CSRF-TOKEN header on all protected requests
-    app.config['JWT_CSRF_CHECK_FORM'] = False
-    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_CSRF_CHECK_FORM'] = False # We will use headers instead of form data for CSRF tokens
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies'] # Tokens will be stored in cookies
 
     # --- Initialize Extensions ---
-    db.init_app(app)
+    db.init_app(app) # Initialize SQLAlchemy with the app
     CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
     
     # --- Setup Flask-JWT-Extended ---

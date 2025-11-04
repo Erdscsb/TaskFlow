@@ -26,11 +26,11 @@ class User(db.Model):
     """
     Represents a user account.
     """
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
+    id = db.Column(db.Integer, primary_key=True) # Primary key
+    email = db.Column(db.String(255), unique=True, nullable=False) # Has to be unique
+    password = db.Column(db.String(255), nullable=False) # Hashed password
     
-    active = db.Column(db.Boolean(), default=True) 
+    active = db.Column(db.Boolean(), default=True)  # Is the user active?
 
     # Relationship to Projects (Many-to-Many)
     # A user can be a member of many projects.
@@ -38,6 +38,7 @@ class User(db.Model):
  
     # Tasks a user has created
     created_tasks = db.relationship('Task', backref='creator', lazy=True, foreign_keys='Task.creator_id')
+    # Reverse relationship defined in Task model for tasks assigned to the user
 
 class Project(db.Model):
     """
@@ -50,6 +51,8 @@ class Project(db.Model):
     # Relationship to Tasks (One-to-Many)
     # If a project is deleted, all of its tasks will be deleted as well.
     tasks = db.relationship('Task', backref='project', lazy=True, cascade="all, delete-orphan")
+    # deleted-orphan ensures tasks are deleted when no longer associated with a project
+    # lazy=True means tasks are loaded only when accessed
 
 class Task(db.Model):
     """
@@ -69,24 +72,26 @@ class Task(db.Model):
     assignees_text = db.Column(db.Text, nullable=True)
 
     # Foreign Key for Creator (User)
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # Nullable in case creator is deleted
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True) # Nullable in case creator is deleted, tasks remain
 
     # Foreign Key to link Task to a Project
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
 
-    @property
+    @property # Returns the list of assignees as a Python list, @property decorator makes it accessible as an attribute, which is needed for serialization
     def assignees(self):
         """Returns the list of assignees from the JSON text field."""
         if not self.assignees_text:
-            return []
+            return [] # Return empty list if no assignees
         try:
-            return json.loads(self.assignees_text)
+            return json.loads(self.assignees_text) # Parse JSON text to list
         except json.JSONDecodeError:
             return []
+    # task.assignees in itself is useless, thats why we need the property decorator, to
+    # convert it to a list
 
-    @assignees.setter
+    @assignees.setter # Setter to update the assignees list
     def assignees(self, value):
         """Sets the assignees list, storing it as JSON text."""
-        if not isinstance(value, list):
+        if not isinstance(value, list): # Ensure value is a list of strings
             raise ValueError("Assignees must be a list of strings.")
-        self.assignees_text = json.dumps(value)
+        self.assignees_text = json.dumps(value) # Convert list to JSON text for storage
