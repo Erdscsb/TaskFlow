@@ -2,12 +2,16 @@
 This file contains the application factory for the TaskFlow Flask app.
 """
 
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
 from .models import db, User
 from .api import api_bp
+
+load_dotenv()
 
 def create_app():
     """
@@ -22,7 +26,9 @@ def create_app():
     app.config['SECRET_KEY'] = 'super-secret-key-change-me'
     
     # Configuration for Flask-JWT-Extended
-    app.config['JWT_SECRET_KEY'] = 'super-secret-jwt-key-change-me' 
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-key-change-me')
+
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'super-secret-jwt-key-change-me')
 
     # Tells JWT-Extended to set a "csrf_access_token" cookie
     app.config['JWT_CSRF_IN_COOKIES'] = True 
