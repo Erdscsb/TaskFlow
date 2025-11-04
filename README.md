@@ -84,12 +84,12 @@ Follow these instructions to get the project running on your local machine.
 
 ### 1\. Clone the Repository
 
-git clone https://github.com/Erdscsb/TaskFlow.git  
-cd TaskFlow 
+1. git clone https://github.com/Erdscsb/TaskFlow.git  
+2. cd TaskFlow 
 
 ### 2\. Backend Setup (Flask)
 
-1.  Bashcd backend
+1.  cd backend
     
 2.  For macOS/Linux - python3 -m venv venvsource venv/bin/activate
 
