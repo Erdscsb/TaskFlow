@@ -23,7 +23,6 @@ def create_app():
     # --- Configuration ---
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///taskflow.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'super-secret-key-change-me'
     
     # Configuration for Flask-JWT-Extended
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-key-change-me')
