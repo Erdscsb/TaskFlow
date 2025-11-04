@@ -14,12 +14,6 @@ db = SQLAlchemy()
 
 # --- Many-to-Many Association Tables ---
 
-# This is an association table for the many-to-many relationship between Users and Roles.
-roles_users = db.Table('roles_users',
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
-)
-
 # This is an association table for the many-to-many relationship between Users and Projects.
 project_members = db.Table('project_members',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -27,14 +21,6 @@ project_members = db.Table('project_members',
 )
 
 # --- Model Definitions ---
-
-class Role(db.Model):
-    """
-    Represents a user role in the system (e.g., 'admin', 'user').
-    """
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
 
 class User(db.Model):
     """
@@ -45,9 +31,6 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     
     active = db.Column(db.Boolean(), default=True) 
-
-    # Relationship to Roles (Many-to-Many)
-    roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
     # Relationship to Projects (Many-to-Many)
     # A user can be a member of many projects.
