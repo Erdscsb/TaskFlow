@@ -128,7 +128,7 @@ const handleUpdateTask = (updatedTask) => {
     setSelectedTask(updatedTask);
   };
 
-// --- ADDED: Handler to remove a task from state ---
+// --- Handler to remove a task from state ---
   const handleDeleteTaskInBoard = (taskId) => {
     setTasksByColumn((prev) => {
       const newColumns = { ...prev };

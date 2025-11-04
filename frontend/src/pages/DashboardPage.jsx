@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import ProjectModal from '../components/ProjectModal.jsx';
 import './DashboardPage.css';
 
 function DashboardPage() {
@@ -8,6 +9,8 @@ function DashboardPage() {
   const [newProjectName, setNewProjectName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [projectToEdit, setProjectToEdit] = useState(null);
 
   // Fetch projects on component mount
   useEffect(() => {
@@ -44,11 +47,7 @@ function DashboardPage() {
   };
 
   const handleDeleteProject = async (e, projectId) => {
-    // Stop the <Link> from navigating
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (window.confirm("Are you sure you want to permanently delete this project and all its tasks?")) {
+   if (window.confirm("Are you sure you want to permanently delete this project and all its tasks?")) {
       try {
         await api.delete(`/projects/${projectId}`);
         // Remove the project from the local state
@@ -58,6 +57,17 @@ function DashboardPage() {
         setError("Failed to delete project.");
       }
     }
+  };
+
+const handleOpenEditModal = (project) => {
+    setProjectToEdit(project);
+  };
+
+const handleUpdateProjectInState = (updatedProject) => {
+    setProjects(projects.map(p => 
+      p.id === updatedProject.id ? updatedProject : p
+    ));
+    setProjectToEdit(null); // Close the modal
   };
 
   if (isLoading) {
@@ -87,21 +97,45 @@ function DashboardPage() {
           <p>You don't have any projects yet. Create one to get started!</p>
         ) : (
           projects.map(project => (
-            <Link to={`/project/${project.id}`} key={project.id} className="project-card">
-              <h3>{project.name}</h3>
-              <p>{project.description || 'No description'}</p>
+            <div key={project.id} className="project-card">
+              
+              {/* --- 1. The main clickable link --- */}
+              <Link to={`/project/${project.id}`} className="project-card-main-link">
+                <h3>{project.name}</h3>
+                <p>{project.description || 'No description'}</p>
+              </Link>
 
-              <button 
-                onClick={(e) => handleDeleteProject(e, project.id)} 
-                className="project-card-delete-btn"
-                title="Delete project"
-              >
-                &times;
-              </button>
-            </Link>
+              {/* --- 2. The action buttons (siblings to the link) --- */}
+              <div className="project-card-actions">
+                <button 
+                  onClick={() => handleOpenEditModal(project)} 
+                  className="project-card-edit-btn"
+                  title="Edit project"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={(e) => handleDeleteProject(e, project.id)} 
+                  className="project-card-delete-btn"
+                  title="Delete project"
+                >
+                  &times;
+                </button>
+              </div>
+
+            </div>
           ))
         )}
       </div>
+
+      {/* --- Render the project modal --- */}
+      {projectToEdit && (
+        <ProjectModal
+          project={projectToEdit}
+          onUpdateProject={handleUpdateProjectInState}
+          onClose={() => setProjectToEdit(null)}
+        />
+      )}
     </div>
   );
 }

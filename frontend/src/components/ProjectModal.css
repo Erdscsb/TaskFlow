@@ -1,0 +1,95 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: var(--surface, white);
+  padding: 24px 32px;
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  z-index: 1001;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+}
+.modal-close:hover {
+  color: var(--text-primary, #1e293b);
+}
+
+.modal-title-header {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.modal-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.modal-input,
+.modal-textarea {
+  width: 100%;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px;
+  font-size: 1rem;
+  margin-bottom: 24px;
+  box-sizing: border-box; /* Important */
+  transition: all 0.2s;
+}
+
+.modal-input:focus,
+.modal-textarea:focus {
+  outline: none;
+  border-color: var(--primary, #6366f1);
+  box-shadow: 0 0 0 3px var(--primary-light, #a5b4fc);
+}
+
+.modal-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.modal-save-button {
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background: var(--primary, #6366f1);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.modal-save-button:hover {
+  background: var(--primary-dark, #4f46e5);
+}

@@ -1,45 +1,131 @@
 :root {
-  --primary: #6366f1;
-  --primary-light: #a5b4fc;
+  /* Color System - Enhanced contrast & semantic naming */
+  --primary-50: #f0f4ff;
+  --primary-100: #e0e7ff;
+  --primary-500: #6366f1;
+  --primary-600: #4f46e5;
+  --primary-700: #4338ca;
+  
   --surface: #ffffff;
   --background: #f8fafc;
+  --background-gradient: linear-gradient(135deg, var(--primary-50) 0%, var(--background) 100%);
+  
   --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-on-primary: #ffffff;
+  
   --border: #e2e8f0;
   --border-hover: #cbd5e1;
+  --border-focus: var(--primary-500);
+  
+  --error: #dc2626;
+  --error-light: #fef2f2;
+  
+  /* Shadow System - Consistent depth */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --radius-lg: 12px;
+  --shadow-focus: 0 0 0 3px rgb(99 102 241 / 0.1);
+  
+  /* Border Radius - Consistent scale */
+  --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-sm: 6px;
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-lg: 12px;
+  
+  /* Spacing - Consistent scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  
+  /* Transitions - Performance optimized */
+  --transition-base: 0.2s ease;
+  --transition-smooth: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* Z-index layers */
+  --z-dragging: 1000;
+  --z-dropzone: 100;
 }
 
-/* --- Board Layout --- */
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Project Header - Centered */
+.project-header {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-2xl) var(--space-lg);
+  background: var(--background-gradient);
+  border-bottom: 1px solid var(--border);
+}
+
+.project-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md);
+  line-height: 1.2;
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.project-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin: 0 auto;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Board Layout - Centered columns */
 .board {
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 24px;
-  padding: 24px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+  justify-content: center; /* Center columns horizontally */
+  gap: var(--space-2xl);
+  padding: var(--space-2xl);
+  min-height: calc(100vh - 160px); /* Adjust based on header height */
+  background: var(--background-gradient);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
-/* --- Column Layout --- */
+.board::-webkit-scrollbar {
+  height: 8px;
+}
+
+.board::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.board::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.board::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* Column Layout - Centered in board */
 .column {
-  width: 320px;
+  width: min(100%, 320px);
+  min-width: 280px;
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  transition: var(--transition);
+  transition: var(--transition-smooth);
+  flex-shrink: 0;
 }
 
 .column:hover {
@@ -47,65 +133,70 @@
   transform: translateY(-2px);
 }
 
+.column:focus-within {
+  box-shadow: var(--shadow-lg), var(--shadow-focus);
+}
+
 .column-title {
-  padding: 16px 20px;
-  font-size: 1.1rem;
+  padding: var(--space-lg) var(--space-xl);
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--text-primary);
-  background: linear-gradient(135deg, var(--surface) 0%, #f8fafc 100%);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--primary-50) 100%);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center; /* Center column title */
+  gap: var(--space-sm);
+  margin: 0;
+  text-align: center;
 }
 
 .column-title::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--primary-500);
+  flex-shrink: 0;
 }
 
 .column-task-list {
-  padding: 12px;
+  padding: var(--space-md);
   min-height: 200px;
   flex-grow: 1;
-  transition: var(--transition);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  transition: var(--transition-base);
+  position: relative;
 }
 
+/* Drop zone states */
 .column-task-list.dragging-over {
-  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 100%);
-  border: 2px dashed var(--primary-light);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+  border: 2px dashed var(--primary-500);
+  margin: -1px;
 }
 
-/* --- Task Card Layout --- */
+.column-task-list.drag-reject {
+  background: var(--error-light);
+  border: 2px dashed var(--error);
+}
+
+/* Task Card */
 .task-card {
   background: var(--surface);
   border-radius: var(--radius-md);
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
-  transition: var(--transition);
+  border-left: 3px solid transparent;
+  transition: var(--transition-smooth);
   color: var(--text-primary);
   cursor: grab;
   position: relative;
   overflow: hidden;
-}
-
-.task-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  opacity: 0;
-  transition: var(--transition);
 }
 
 .task-card:hover {
@@ -114,21 +205,54 @@
   transform: translateY(-2px);
 }
 
-.task-card:hover::before {
-  opacity: 1;
+.task-card:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
 .task-card:active {
   cursor: grabbing;
-  transform: rotate(2deg);
+  transform: rotate(2deg) scale(1.02);
 }
 
+/* Expired task state */
+.task-card.expired {
+  border-left-color: var(--error);
+  background: var(--error-light);
+}
+
+.task-card.expired .task-card-title {
+  color: var(--error);
+}
+
+.task-card.expired .task-card-desc {
+  color: var(--text-secondary);
+}
+
+/* Drag states */
+.task-card.dragging {
+  transform: rotate(5deg) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-500);
+  z-index: var(--z-dragging);
+  cursor: grabbing;
+  opacity: 0.9;
+}
+
+.task-card.drag-preview {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+/* Task content */
 .task-card-title {
   font-size: 1rem;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--space-sm) 0;
   line-height: 1.4;
-  color: var(--text-primary);
+  color: inherit;
+  word-wrap: break-word;
+  text-align: center; /* Center task titles */
 }
 
 .task-card-desc {
@@ -136,47 +260,175 @@
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
-  white-space: pre-wrap;
   display: -webkit-box;
   line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-wrap: break-word;
+  text-align: center; /* Center task descriptions */
 }
 
-/* Drag Overlay Styles */
-.task-card.dragging {
-  transform: rotate(5deg) scale(1.02);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
+/* Task footer */
+.task-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-lg);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+  gap: var(--space-sm);
 }
 
-.task-card.dragging::before {
-  opacity: 1;
+.task-card-expiry {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
-/* Empty State */
+.task-card-expiry.is-expired {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.task-card-assignees {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Center assignees */
+  gap: var(--space-xs);
+  min-height: 24px;
+}
+
+.mini-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-100);
+  color: var(--primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 2px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+/* Empty state */
 .column-task-list:empty::after {
   content: "Drop tasks here";
   display: block;
   text-align: center;
-  padding: 40px 20px;
+  padding: 40px var(--space-xl);
   color: var(--text-muted);
   font-size: 0.875rem;
   border: 2px dashed var(--border);
   border-radius: var(--radius-md);
-  margin: 8px;
+  margin: var(--space-sm);
+  transition: var(--transition-base);
 }
 
-/* Smooth animations for drag and drop */
-.column-task-list {
-  animation: fadeIn 0.3s ease-out;
+.column-task-list:empty:hover::after {
+  border-color: var(--primary-500);
+  color: var(--primary-500);
+  background: var(--primary-50);
 }
 
+/* New Task Form - Centered and compact */
+.new-task-form {
+  margin: 0 auto var(--space-2xl); /* Center the form */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  background: var(--surface);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  max-width: 400px; /* Compact form width */
+  width: 100%;
+}
+
+.new-task-form input[type="text"] {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-align: center; /* Center input text */
+}
+
+.new-task-form input[type="text"]::placeholder {
+  color: var(--text-muted);
+  text-align: center; /* Center placeholder */
+}
+
+/* Compact Date Input */
+.new-task-form input[type="date"] {
+  width: 100%;
+  max-width: 200px; /* Smaller date input */
+  margin: 0 auto; /* Center the date input */
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.new-task-form input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.new-task-form button {
+  border: none;
+  background: var(--primary-500);
+  color: var(--text-on-primary);
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
+  margin: 0 auto; /* Center the button */
+  min-width: 120px; /* Consistent button width */
+}
+
+.new-task-form button:hover {
+  background: var(--primary-600);
+  transform: translateY(-1px);
+}
+
+.new-task-form button:active {
+  transform: translateY(0);
+}
+
+.new-task-form button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.new-task-form button:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animation System */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -184,105 +436,93 @@
   }
 }
 
-/* --- Task Card Footer Styles --- */
-.task-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border, #e2e8f0);
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.task-card-expiry {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary, #64748b);
+.column-task-list {
+  animation: fadeIn 0.3s ease-out;
 }
 
-.task-card-expiry.is-expired {
-  color: #ef4444; /* Error color */
-  font-weight: 600;
+.task-card {
+  animation: slideIn 0.2s ease-out;
 }
 
-.task-card.expired {
-  border-left: 4px solid #ef4444;
-  background: #fef2f2;
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.task-card-assignees {
-  display: flex;
+/* Responsive design */
+@media (max-width: 768px) {
+  .project-header {
+    padding: var(--space-xl) var(--space-lg) var(--space-md);
+  }
+  
+  .project-title {
+    font-size: 2rem;
+  }
+  
+  .project-description {
+    font-size: 1rem;
+    padding: 0 var(--space-md);
+  }
+  
+  .board {
+    padding: var(--space-md);
+    gap: var(--space-lg);
+    justify-content: flex-start; /* Switch to horizontal scroll on mobile */
+  }
+  
+  .column {
+    min-width: 280px;
+  }
+  
+  .column-title {
+    padding: var(--space-md) var(--space-lg);
+    font-size: 1rem;
+  }
+  
+  .new-task-form {
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    max-width: 100%;
+  }
+  
+  .task-card-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  
+  .task-card-assignees {
+    align-self: center;
+  }
+  
+  .new-task-form input[type="date"] {
+    max-width: 150px; /* Even smaller on mobile */
+  }
 }
 
-.mini-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--primary-light, #a5b4fc);
-  color: var(--primary-dark, #4f46e5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-left: -8px; /* Creates the overlap */
-  border: 2px solid white;
-  box-shadow: var(--shadow-sm);
-}
-
-.mini-avatar:first-child {
-  margin-left: 0;
-}
-
-
-/* --- New Task Form --- */
-.new-task-form {
-  margin-bottom: 24px;
-  display: flex;
-  gap: 8px;
-  background: var(--surface);
-  padding: 16px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-.new-task-form input[type="text"] {
-  width: 100%;
-  padding: 10px 16px;
-  font-size: 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  transition: var(--transition);
-}
-
-.new-task-form input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-/* --- Date input style --- */
-.new-task-form input[type="date"] {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-
-.new-task-form button {
-  border: none;
-  background: var(--primary);
-  color: white;
-  padding: 10px 20px;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-
-.new-task-form button:hover {
-  background: var(--primary-dark);
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: #000000;
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+  }
+  
+  .task-card {
+    border-width: 2px;
+  }
 }
