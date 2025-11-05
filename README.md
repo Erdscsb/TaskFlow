@@ -1,9 +1,9 @@
-TaskFlow Kanban Board 🚀
+Kanban Board 🚀
 ========================
 
-TaskFlow is a full-stack project management application inspired by tools like Trello and Asana. It features a secure **Flask (Python)** backend serving a RESTful API and a modern, dynamic **React (JavaScript)** frontend built with Vite.
+Full-stack project management application inspired by tools like Trello and Asana. It features a secure **Flask (Python)** backend serving a RESTful API and a modern, dynamic **React (JavaScript)** frontend built with Vite.
 
-Users can register, create projects, and manage tasks through a visual, drag-and-drop Kanban board. The app implements secure, cookie-based token authentication with CSRF protection.
+Users can register, create projects, manage project members, and organize tasks through a visual, drag-and-drop Kanban board. The app implements secure, cookie-based token authentication with CSRF protection and a robust role-based access control system.
 
 Features
 --------
@@ -12,9 +12,15 @@ Features
     
 *   **CSRF Protection:** All authenticated requests are protected against Cross-Site Request Forgery.
     
-*   **Access Control:** A secure, ownership-based access model ensures users can only view and manage projects they are members of.
+*   **Role-Based Access Control (RBAC):** A secure, privilege-based access model ensures users have specific roles within each project:
     
+    *   **Owner:** Can edit/delete the project, manage tasks, and add/remove other members or change their roles.
+        
+    *   **Member:** Can view the project and manage tasks (create, edit, delete, move), but cannot change project settings or manage other members.
+        
 *   **Project Management:** Full **CRUD** (Create, Read, Update, Delete) operations for projects from a central dashboard.
+    
+*   **Member Management:** Project owners can add new users to a project by email, change existing members' roles, or remove them from a project.
     
 *   **Task Management:** Full **CRUD** operations for tasks, which belong to specific projects.
     
@@ -24,7 +30,7 @@ Features
     
 *   **Relational Data:**
     
-    *   **Many-to-Many:** Users can be members of multiple projects, and projects can have multiple users.
+    *   **Many-to-Many (with Roles):** A ProjectMember association model links Users and Projects, storing a role (e.g., 'owner', 'member') for each user in each project.
         
     *   **One-to-Many:** A project can have many tasks.
         
@@ -129,23 +135,30 @@ The Flask backend provides the following RESTful API endpoints:
 
 ### Projects
 
-*   GET /api/projects: Get all projects for the authenticated user.
+*   GET /api/projects: Get all projects for the authenticated user (includes member/role data).
     
-*   POST /api/projects: Create a new project.
+*   POST /api/projects: Create a new project (sets creator as 'owner').
     
-*   GET /api/projects/: Get details for a single project (and its tasks).
+*   GET /api/projects/<id>: Get details for a single project (and its tasks/members).
     
-*   PUT /api/projects/: Update a project's details.
+*   PUT /api/projects/<id>: Update a project's details (Owner only).
     
-*   DELETE /api/projects/: Delete a project.
+*   DELETE /api/projects/<id>: Delete a project (Owner only).
     
+### Members (New)
+
+*   POST /api/projects/<id>/members: Add a new user to a project (Owner only).
+    
+*   PUT /api/projects/<id>/members/<user_id>: Change a member's role (Owner only).
+    
+*   DELETE /api/projects/<id>/members/<user_id>: Remove a member from a project (Owner only).
 
 ### Tasks
 
-*   POST /api/projects//tasks: Create a new task for a project.
+*   POST /api/projects/<id>/tasks: Create a new task for a project (Members+).
     
-*   PUT /api/tasks/: Update a task's details.
+*   PUT /api/tasks/<id>: Update a task's details (Members+).
     
-*   DELETE /api/tasks/: Delete a task.
+*   DELETE /api/tasks/<id>: Delete a task (Members+).
     
-*   PATCH /api/tasks//move: **(Workflow)** Updates a task's status (column) and order after a drag-and-drop.
+*   PATCH /api/tasks/<id>/move: **(Workflow)** Updates a task's status (column) and order after a drag-and-drop (Members+).
