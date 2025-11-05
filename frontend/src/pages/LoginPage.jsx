@@ -10,14 +10,14 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent form default submission
     if (!email || !password) {
       alert('Please enter email and password');
       return;
     }
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      await login(email, password); // Call login from AuthContext
+      navigate('/dashboard'); // Redirect to dashboard on successful login
     } catch (error) {
     }
   };

@@ -16,7 +16,7 @@ function DashboardPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        setIsLoading(true);
+        setIsLoading(true); // Start loading
         const response = await api.get("/projects");
         setProjects(response.data);
         setError(null);
@@ -33,7 +33,7 @@ function DashboardPage() {
   // Handle new project creation
   const handleCreateProject = async (e) => {
     e.preventDefault();
-    if (!newProjectName.trim()) return;
+    if (!newProjectName.trim()) return; // Do not create if name is empty
 
     try {
       const response = await api.post('/projects', { name: newProjectName });
@@ -51,7 +51,7 @@ function DashboardPage() {
       try {
         await api.delete(`/projects/${projectId}`);
         // Remove the project from the local state
-        setProjects(projects.filter(p => p.id !== projectId));
+        setProjects(projects.filter(p => p.id !== projectId)); // Update state to remove deleted project
       } catch (err) {
         console.error("Error deleting project:", err);
         setError("Failed to delete project.");
@@ -60,14 +60,14 @@ function DashboardPage() {
   };
 
 const handleOpenEditModal = (project) => {
-    setProjectToEdit(project);
+    setProjectToEdit(project); // Open the modal with the project data
   };
 
 const handleUpdateProjectInState = (updatedProject) => {
     setProjects(projects.map(p => 
       p.id === updatedProject.id ? updatedProject : p
     ));
-    setProjectToEdit(null); // Close the modal
+    setProjectToEdit(null); // Close the modal by assigning null
   };
 
   if (isLoading) {

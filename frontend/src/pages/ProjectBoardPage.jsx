@@ -35,8 +35,8 @@ function ProjectBoardPage() {
   // This state holds the task that is currently being dragged
   const [activeTask, setActiveTask] = useState(null);
 
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [newTaskExpiry, setNewTaskExpiry] = useState('');
+  const [selectedTask, setSelectedTask] = useState(null); // For the task modal
+  const [newTaskExpiry, setNewTaskExpiry] = useState(''); // New task expiry date
 
   // Helper function to find a task by its ID across all columns
   const findTask = (taskId) => {
