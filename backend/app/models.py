@@ -11,16 +11,21 @@ from datetime import datetime
 # Initialize the SQLAlchemy extension.
 db = SQLAlchemy()
 
-
-# --- Many-to-Many Association Tables ---
-
-# This is an association table for the many-to-many relationship between Users and Projects.
-project_members = db.Table('project_members',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
-)
-
 # --- Model Definitions ---
+
+class ProjectMember(db.Model):
+    """
+    This is an "association object" that links a User to a Project
+    and stores their role for that specific project.
+    """
+    __tablename__ = 'project_members'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), primary_key=True)
+    
+    role = db.Column(db.String(50), nullable=False, default='member') # e.g., 'owner', 'member'
+
+    user = db.relationship('User', back_populates='project_associations')
+    project = db.relationship('Project', back_populates='member_associations')
 
 class User(db.Model):
     """
@@ -32,10 +37,8 @@ class User(db.Model):
     
     active = db.Column(db.Boolean(), default=True)  # Is the user active?
 
-    # Relationship to Projects (Many-to-Many)
-    # A user can be a member of many projects.
-    projects = db.relationship('Project', secondary=project_members, backref=db.backref('members', lazy=True))
- 
+    project_associations = db.relationship('ProjectMember', back_populates='user', cascade="all, delete-orphan")
+   
     # Tasks a user has created
     created_tasks = db.relationship('Task', backref='creator', lazy=True, foreign_keys='Task.creator_id')
     # Reverse relationship defined in Task model for tasks assigned to the user
@@ -48,11 +51,17 @@ class Project(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
 
+    member_associations = db.relationship('ProjectMember', back_populates='project', cascade="all, delete-orphan")
+
     # Relationship to Tasks (One-to-Many)
     # If a project is deleted, all of its tasks will be deleted as well.
     tasks = db.relationship('Task', backref='project', lazy=True, cascade="all, delete-orphan")
     # deleted-orphan ensures tasks are deleted when no longer associated with a project
     # lazy=True means tasks are loaded only when accessed
+
+    @property
+    def members(self):
+        return [assoc.user for assoc in self.member_associations]
 
 class Task(db.Model):
     """

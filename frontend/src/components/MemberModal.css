@@ -1,0 +1,111 @@
+.modal-title-header {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.modal-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+/* --- Add Member Form --- */
+.add-member-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.add-member-form input {
+  flex-grow: 1;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 10px 12px;
+}
+
+.add-member-form button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background: var(--primary, #6366f1);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+.add-member-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Member List --- */
+.member-list {
+  margin-top: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-email {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.member-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-role-you {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--primary-50, #eef2ff);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.member-actions select {
+  padding: 6px 10px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border, #e2e8f0);
+  font-size: 0.9rem;
+}
+
+.remove-member-btn {
+  background: transparent;
+  border: none;
+  color: var(--error, #ef4444);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+}
+.remove-member-btn:hover {
+  background: var(--error-light, #fef2f2);
+}
+
+.error-message {
+  color: var(--error, #ef4444);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}

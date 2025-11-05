@@ -14,6 +14,8 @@ import api from '../services/api';
 import Board from '../components/Board.jsx';
 import TaskCard from '../components/TaskCard.jsx';
 import TaskModal from '../components/TaskModal.jsx'; 
+import { useAuth } from '../context/AuthContext';
+import MemberModal from '../components/MemberModal.jsx';
 import './ProjectBoardPage.css';
 
 // Define the column IDs
@@ -37,6 +39,9 @@ function ProjectBoardPage() {
 
   const [selectedTask, setSelectedTask] = useState(null); // For the task modal
   const [newTaskExpiry, setNewTaskExpiry] = useState(''); // New task expiry date
+
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const { user } = useAuth(); // Get the current user
 
   // Helper function to find a task by its ID across all columns
   const findTask = (taskId) => {
@@ -268,10 +273,28 @@ const handleCreateTask = async (e) => {
     return <div className="project-page-container">Project not found.</div>;
   }
 
+  // --- FIND USER'S ROLE ---
+  const currentUserRole = project.members.find(m => m.id === user.id)?.role;
+  const isOwner = currentUserRole === 'owner';
+
   return (
     <div className="project-page-container">
-      <h1 className="project-title">{project.name}</h1>
-      <p className="project-description">{project.description}</p>
+      <header className="project-header">
+        <div>
+          <h1 className="project-title">{project.name}</h1>
+          <p className="project-description">{project.description}</p>
+        </div>
+        
+        {/* --- MANAGE MEMBERS BUTTON --- */}
+        {isOwner && (
+          <button 
+            className="manage-members-btn" 
+            onClick={() => setIsMemberModalOpen(true)}
+          >
+            Manage Members
+          </button>
+        )}
+      </header>
 
       <form className="new-task-form" onSubmit={handleCreateTask}>
         <input
@@ -316,6 +339,14 @@ const handleCreateTask = async (e) => {
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTaskInBoard}
           onClose={() => setSelectedTask(null)}
+        />
+      )}
+
+      {isOwner && isMemberModalOpen && (
+        <MemberModal
+          project={project}
+          onClose={() => setIsMemberModalOpen(false)}
+          onDataRefresh={fetchProjectData}
         />
       )}
     </div>

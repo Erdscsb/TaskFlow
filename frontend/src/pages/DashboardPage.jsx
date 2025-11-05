@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import ProjectModal from '../components/ProjectModal.jsx';
 import './DashboardPage.css';
+import { useAuth } from '../context/AuthContext.jsx';
 
 function DashboardPage() {
   const [projects, setProjects] = useState([]);
@@ -11,6 +12,8 @@ function DashboardPage() {
   const [error, setError] = useState(null);
 
   const [projectToEdit, setProjectToEdit] = useState(null);
+
+  const { user } = useAuth();
 
   // Fetch projects on component mount
   useEffect(() => {
@@ -93,38 +96,45 @@ const handleUpdateProjectInState = (updatedProject) => {
       {error && <div className="error-message">{error}</div>}
 
       <div className="project-list">
-        {projects.length === 0 && !isLoading ? (
+      {projects.length === 0 && !isLoading ? (
           <p>You don't have any projects yet. Create one to get started!</p>
         ) : (
-          projects.map(project => (
-            <div key={project.id} className="project-card">
-              
-              {/* --- 1. The main clickable link --- */}
-              <Link to={`/project/${project.id}`} className="project-card-main-link">
-                <h3>{project.name}</h3>
-                <p>{project.description || 'No description'}</p>
-              </Link>
+          projects.map(project => {
+            // --- ADD ROLE LOGIC ---
+            const myRole = project.members.find(m => m.id === user.id)?.role;
+            const isOwner = myRole === 'owner';
 
-              {/* --- 2. The action buttons (siblings to the link) --- */}
-              <div className="project-card-actions">
-                <button 
-                  onClick={() => handleOpenEditModal(project)} 
-                  className="project-card-edit-btn"
-                  title="Edit project"
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={(e) => handleDeleteProject(e, project.id)} 
-                  className="project-card-delete-btn"
-                  title="Delete project"
-                >
-                  &times;
-                </button>
+            return (
+              <div key={project.id} className="project-card">
+                
+                <Link to={`/project/${project.id}`} className="project-card-main-link">
+                  <h3>{project.name}</h3>
+                  <p>{project.description || 'No description'}</p>
+                </Link>
+
+                {/* --- CONDITIONALLY RENDER ACTIONS --- */}
+                {isOwner && (
+                  <div className="project-card-actions">
+                    <button 
+                      onClick={() => handleOpenEditModal(project)} 
+                      className="project-card-edit-btn"
+                      title="Edit project"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={(e) => handleDeleteProject(e, project.id)} 
+                      className="project-card-delete-btn"
+                      title="Delete project"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                )}
+
               </div>
-
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
