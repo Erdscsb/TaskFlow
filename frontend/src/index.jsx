@@ -10,8 +10,8 @@ const root = createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
+    <BrowserRouter> {/* Wrap the app with BrowserRouter for routing, /login, /dashboard etc */}
+      <AuthProvider> {/* Provide auth context to the entire app, to know that the user is logged in*/}
         <App />
       </AuthProvider>
     </BrowserRouter>

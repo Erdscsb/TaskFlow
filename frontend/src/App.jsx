@@ -9,7 +9,7 @@ import ProjectBoardPage from './pages/ProjectBoardPage.jsx';
 import Navbar from './components/Navbar.jsx';
 
 function App() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth(); // Get auth state from AuthContext
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -21,7 +21,7 @@ function App() {
       
       <main>
         <Routes>
-          {user ? (
+          {user ? ( // Check if the user is logged in
             /* --- Protected Routes (User is Logged In) --- */
             <>
               <Route path="/dashboard" element={<DashboardPage />} />

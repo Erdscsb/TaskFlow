@@ -24,7 +24,6 @@ def parse_iso_date(date_string):
         # Handles 'YYYY-MM-DD' by converting to full datetime
         if len(date_string) == 10:
              return datetime.strptime(date_string, '%Y-%m-%d')
-        # Handles full ISO 8601 format
         return datetime.fromisoformat(date_string.replace('Z', '+00:00'))
     except ValueError:
         return None
@@ -43,25 +42,26 @@ class TaskListResource(Resource):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
         if not user:
-            return {'message': 'User not found'}, 401
+            return {'message': 'User not found'}, 401 # Unauthorized
         
         project = Project.query.get(project_id)
         if not project:
-            return {'message': 'Project not found'}, 404
+            return {'message': 'Project not found'}, 404 # Not Found
         
         # --- SECURITY CHECK ---
         if user not in project.members:
-            return {'message': 'Unauthorized'}, 403
+            return {'message': 'Unauthorized'}, 403 # Forbidden
 
         data = request.get_json()
         if not data.get('title'):
-            return {'message': 'Task title is required'}, 400
+            return {'message': 'Task title is required'}, 400 # Bad Request
 
         status = data.get('status', 'TODO')
-        max_order = db.session.query(db.func.max(Task.order)).filter_by(
+        max_order = db.session.query(db.func.max(Task.order)).filter_by( 
+            # Get max order in the status column
             project_id=project_id, 
             status=status
-        ).scalar()
+        ).scalar() # Get the scalar value
         
         new_order = (max_order or 0) + 1
 
@@ -78,13 +78,13 @@ class TaskListResource(Resource):
         if 'assignees' in data and isinstance(data['assignees'], list):
             new_task.assignees = data['assignees'] # Use the setter property
 
-        db.session.add(new_task)
+        db.session.add(new_task) # Add the new task to the session
         db.session.commit()
 
         db.session.refresh(new_task)
 
-        new_task = Task.query.get(new_task.id)
-        return serialize_task(new_task), 201
+        new_task = Task.query.get(new_task.id) # Re-fetch to get updated fields
+        return serialize_task(new_task), 201 # Created
 
 class TaskResource(Resource):
     """
@@ -101,17 +101,17 @@ class TaskResource(Resource):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
         if not user:
-            return {'message': 'User not found'}, 401
+            return {'message': 'User not found'}, 401 # Unauthorized
 
         task = Task.query.get(task_id)
         if not task:
-            return {'message': 'Task not found'}, 404
-        
+            return {'message': 'Task not found'}, 404 # Not Found
+
         # --- SECURITY CHECK ---
         # We check membership via the task's parent project
         if user not in task.project.members:
-            return {'message': 'Unauthorized'}, 403
-            
+            return {'message': 'Unauthorized'}, 403 # Forbidden
+
         data = request.get_json()
         task.title = data.get('title', task.title)
         task.description = data.get('description', task.description)
@@ -127,7 +127,7 @@ class TaskResource(Resource):
             elif assignees_list is None:
                 task.assignees = [] # Clear assignees
             else:
-                return {'message': 'assignees must be a list'}, 400
+                return {'message': 'assignees must be a list'}, 400 # Bad Request
 
         db.session.commit()
 
@@ -143,16 +143,16 @@ class TaskResource(Resource):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
         if not user:
-            return {'message': 'User not found'}, 401
-        
+            return {'message': 'User not found'}, 401 # Unauthorized
+
         task = Task.query.get(task_id)
         if not task:
-            return {'message': 'Task not found'}, 404
+            return {'message': 'Task not found'}, 404 # Not Found
 
         # --- SECURITY CHECK ---
         if user not in task.project.members:
-            return {'message': 'Unauthorized'}, 403
-            
+            return {'message': 'Unauthorized'}, 403 # Forbidden
+
         db.session.delete(task)
         db.session.commit()
         
@@ -163,7 +163,7 @@ class TaskMoveResource(Resource):
     Handles the drag-and-drop logic for moving a task.
     - PATCH /api/tasks/<int:task_id>/move
     """
-    @jwt_required()  # <-- Decorator changed
+    @jwt_required()
     def patch(self, task_id):
         """
         Updates a task's status and/or order.
@@ -177,11 +177,11 @@ class TaskMoveResource(Resource):
 
         task = Task.query.get(task_id)
         if not task:
-            return {'message': 'Task not found'}, 404
+            return {'message': 'Task not found'}, 404 # Not Found
         
         # --- SECURITY CHECK ---
         if user not in task.project.members:
-            return {'message': 'Unauthorized'}, 403
+            return {'message': 'Unauthorized'}, 403 # Forbidden
 
         data = request.get_json()
         

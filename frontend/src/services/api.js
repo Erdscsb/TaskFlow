@@ -2,13 +2,13 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 // Create a new axios instance
-const api = axios.create({
+const api = axios.create({ // API Calls handling
   baseURL: '/api',
   withCredentials: true,
 });
 
 // This function will run on *every* request before it's sent
-api.interceptors.request.use(
+api.interceptors.request.use( // Add CSRF token to headers
   (config) => {
 
     // Read the CSRF token from the cookie

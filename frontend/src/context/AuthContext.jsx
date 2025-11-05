@@ -4,8 +4,8 @@ import api from '../services/api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState(null); // null = not logged in, object = logged in
+    const [isLoading, setIsLoading] = useState(true); // Loading state while checking auth status
 
     // This runs once when the app loads to check if the user is already logged in
     useEffect(() => {
@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
             try {
                 const response = await api.get('/me');
                 // If successful, set the user
-                setUser(response.data.user);
+                setUser(response.data.user); // Assuming the backend returns { user: { ... } }
             } catch (error) {
                 // If it fails (401, etc.), the user is not logged in
                 setUser(null);
@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
         }
     }, []);
 
-    const value = useMemo(() => ({
+    const value = useMemo(() => ({ // Memorize the context value
         user,
         isLoading,
         login,
@@ -67,8 +67,8 @@ export function AuthProvider({ children }) {
         register
     }), [user, isLoading, login, logout, register]);
 
-    return (
-        <AuthContext.Provider value={value}>
+    return ( // Provide the auth context to children
+        <AuthContext.Provider value={value}> 
             {children}
         </AuthContext.Provider>
     );
